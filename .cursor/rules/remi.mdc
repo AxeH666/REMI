@@ -1,0 +1,15 @@
+---
+description: REMI proof-of-concept product and engineering boundaries
+alwaysApply: true
+---
+
+Read `AGENTS.md` and the documents it references before changing code.
+
+Implement only the current REMI proof of concept: one MP4 plus one prompt sent server-side to Gemini, returning a validated structured creative critique.
+
+Do not add authentication, persistence, Instagram integration, preprocessing, secondary models, deployment, virality prediction or unrelated creator tools unless the user explicitly changes scope.
+
+Protect unpublished videos and keep `GEMINI_API_KEY` exclusively server-side.
+
+After meaningful changes, run the relevant lint, type-check and test commands and report their outcomes.
+

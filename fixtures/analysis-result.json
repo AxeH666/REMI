@@ -1,0 +1,43 @@
+{
+  "verdict": "The Reel feels considered and emotionally safe, but a slow opening and restrained delivery keep its reassurance from landing with full clarity.",
+  "problems": [
+    {
+      "title": "The opening waits too long to establish the message",
+      "startSeconds": 0,
+      "endSeconds": 2.8,
+      "observation": "The speaker settles into position and takes a breath before the first complete sentence begins; the opening caption is already visible during the pause.",
+      "interpretation": "The stillness reads as setup rather than intentional reflection, so the viewer has to wait to understand what the Reel is offering.",
+      "fixType": "edit",
+      "instruction": "Trim the first 1.2 seconds so the clip starts on the inhale immediately before the opening sentence, while keeping the full first word intact.",
+      "confidence": 0.94
+    },
+    {
+      "title": "The key reassurance is delivered without a clear emphasis",
+      "startSeconds": 5.4,
+      "endSeconds": 10.2,
+      "observation": "The line containing the main reassurance is spoken at nearly the same pace and volume as the setup, and the speaker looks below the lens during its final phrase.",
+      "interpretation": "The wording is compassionate, but the even delivery and broken eye contact make the central thought feel read rather than personally offered.",
+      "fixType": "reshoot",
+      "instruction": "Reshoot only this sentence: look into the lens, place vocal emphasis on the central reassurance, then leave a half-second pause before continuing.",
+      "confidence": 0.86
+    },
+    {
+      "title": "The music masks the final practical step",
+      "startSeconds": 12.8,
+      "endSeconds": 16.6,
+      "observation": "The background music rises as the speaker gives the final action, making the last few words less distinct than the preceding speech.",
+      "interpretation": "The Reel becomes hardest to hear at the moment when the viewer most needs a clear, concrete takeaway.",
+      "fixType": "either",
+      "instruction": "Lower the music by about 4 dB from 12.8 seconds through the end; if the original voice track is already distorted, rerecord just the final action as a clean voice-over.",
+      "confidence": 0.78
+    }
+  ],
+  "keep": [
+    "Keep the calm, non-judgmental wording; it supports trust without using shame, fear, or diagnosis.",
+    "Keep the uncluttered framing and steady captions, which make the speaker and message easy to follow."
+  ],
+  "limitations": [
+    "Timestamps are approximate and should be checked against the source edit before cutting.",
+    "The video alone cannot establish how individual viewers will respond, and no platform performance data was supplied."
+  ]
+}
