@@ -29,6 +29,7 @@ const API_URL = "http://localhost/api/analyze";
 const TEST_API_KEY = "test-secret-api-key";
 const TEST_MODEL = "test-gemini-model";
 const DEFAULT_PROMPT = "Why does this Reel feel wrong?";
+const authorizeRequest = () => "authorized" as const;
 
 const environment = {
   GEMINI_API_KEY: TEST_API_KEY,
@@ -81,6 +82,7 @@ function createHarness(analyzeVideo = createAnalyzeMock()) {
     analyzeVideo,
     post: createPostHandler({
       analyzeVideo,
+      getAccessStatus: authorizeRequest,
       getEnvironment: () => environment,
     }),
   };
@@ -103,7 +105,7 @@ async function expectErrorResponse(
   },
 ) {
   expect(response.status).toBe(status);
-  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(response.headers.get("cache-control")).toContain("no-store");
   expect(response.headers.get("x-content-type-options")).toBe("nosniff");
   expect(response.headers.get("content-type")).toContain("application/json");
 
@@ -126,12 +128,52 @@ async function expectErrorResponse(
 
 describe("POST /api/analyze request parsing", () => {
   it.each([
+    ["unauthorized", 401, "AUTHENTICATION_REQUIRED"],
+    ["misconfigured", 503, "CONFIGURATION_ERROR"],
+  ] as const)(
+    "rejects %s access before origin, configuration, body parsing, or analysis",
+    async (accessStatus, status, code) => {
+      const analyzeVideo = createAnalyzeMock();
+      const getEnvironment = vi.fn(() => environment);
+      const request = new Request(API_URL, {
+        body: createValidFormData(),
+        headers: { origin: "https://attacker.example" },
+        method: "POST",
+      });
+      const formData = vi.spyOn(request, "formData");
+      const post = createPostHandler({
+        analyzeVideo,
+        getAccessStatus: () => accessStatus,
+        getEnvironment,
+      });
+
+      const response = await post(request);
+
+      await expectErrorResponse(response, { code, status });
+      if (accessStatus === "unauthorized") {
+        expect(response.headers.get("www-authenticate")).toContain(
+          'Basic realm="REMI Private POC"',
+        );
+      } else {
+        expect(response.headers.has("www-authenticate")).toBe(false);
+      }
+      expect(getEnvironment).not.toHaveBeenCalled();
+      expect(formData).not.toHaveBeenCalled();
+      expect(analyzeVideo).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
     ["a different Origin", { origin: "https://attacker.example" }],
     ["a cross-site fetch marker", { "sec-fetch-site": "cross-site" }],
   ])("rejects %s before loading configuration", async (_label, headers) => {
     const analyzeVideo = createAnalyzeMock();
     const getEnvironment = vi.fn(() => environment);
-    const post = createPostHandler({ analyzeVideo, getEnvironment });
+    const post = createPostHandler({
+      analyzeVideo,
+      getAccessStatus: authorizeRequest,
+      getEnvironment,
+    });
     const request = new Request(API_URL, {
       body: createValidFormData(),
       headers,
@@ -340,6 +382,7 @@ describe("POST /api/analyze environment handling", () => {
     const analyzeVideo = createAnalyzeMock();
     const post = createPostHandler({
       analyzeVideo,
+      getAccessStatus: authorizeRequest,
       getEnvironment: () => {
         throw new Error(environmentFailure);
       },
@@ -361,6 +404,7 @@ describe("POST /api/analyze success", () => {
     const analyzeVideo = createAnalyzeMock();
     const post = createPostHandler({
       analyzeVideo,
+      getAccessStatus: authorizeRequest,
       getEnvironment: () => environment,
     });
     const request = createRequest(
@@ -423,6 +467,7 @@ describe("POST /api/analyze failure mapping", () => {
     );
     const post = createPostHandler({
       analyzeVideo,
+      getAccessStatus: authorizeRequest,
       getEnvironment: () => environment,
     });
 
@@ -451,6 +496,7 @@ describe("POST /api/analyze failure mapping", () => {
     );
     const post = createPostHandler({
       analyzeVideo,
+      getAccessStatus: authorizeRequest,
       getEnvironment: () => environment,
     });
 
@@ -471,6 +517,7 @@ describe("POST /api/analyze failure mapping", () => {
     );
     const post = createPostHandler({
       analyzeVideo,
+      getAccessStatus: authorizeRequest,
       getEnvironment: () => environment,
     });
 

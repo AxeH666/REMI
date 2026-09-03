@@ -25,23 +25,23 @@ Read these files in order:
 
 If implementation and documentation disagree, stop and update the documentation or ask for a decision. Do not silently change scope.
 
-## Fixed Scope
+## Current Scope
 
-Version 0 contains:
+The private POC contains:
 
-- one local web page;
+- one remotely deployable web page;
 - one video upload;
 - one prompt input;
 - Gemini video analysis;
 - structured critique results;
 - loading and error states;
+- HTTP Basic access for the owner and one friend;
 - no permanent storage.
 
 ## Explicit Non-Goals
 
 Do not add any of these unless the user changes the scope:
 
-- authentication;
 - database or Supabase;
 - Instagram API integration;
 - analytics or Insights screenshots;
@@ -50,7 +50,6 @@ Do not add any of these unless the user changes the scope:
 - FFmpeg, OpenCV, MediaPipe or separate transcription;
 - Grok or model routing;
 - payments;
-- deployment;
 - automatic editing or posting;
 - virality or reach prediction.
 
@@ -68,6 +67,9 @@ Use Node.js 22.14.0 as the development baseline. Do not raise the minimum unless
 ## Engineering Rules
 
 - Keep `GEMINI_API_KEY` server-side. Never expose it through client code or a `NEXT_PUBLIC_` variable.
+- Require distinct high-entropy `REMI_OWNER_PASSWORD` and `REMI_FRIEND_PASSWORD` values in every deployed environment.
+- Protect the analysis route directly as well as through the application-wide request proxy.
+- Keep `/api/health` public but limited to a generic configuration-readiness result.
 - Validate video type and size before sending it to Gemini.
 - Accept MP4 first. Other formats are optional, not required.
 - Keep the model identifier configurable with `GEMINI_MODEL`.
@@ -101,12 +103,14 @@ For mental-health content, the critique must not reward fearmongering, shame, di
 The POC is done when:
 
 - a user can select an MP4, enter a question and submit it;
+- only the owner and invited friend can access the application or analysis route;
 - the API key remains server-side;
 - the UI shows upload/analysis progress;
 - Gemini returns a response conforming to the documented schema;
 - the results show a verdict, up to three timestamped problems, exact fixes, strengths and limitations;
 - invalid files, missing prompts, API failures and invalid model output have useful errors;
 - tests cover validation and result parsing;
+- tests cover private access, endpoint authorization, proxy-aware same-origin checks and deployment health;
 - `npm run lint`, `npm run typecheck` and `npm test` pass;
 - the README contains working Windows setup instructions.
 

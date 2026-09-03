@@ -163,3 +163,27 @@ Record material product and architecture decisions here. Do not rewrite history;
 **Decision:** Keep `main` as the stable baseline. Develop all further work on branches, with one logical component and its tests and documentation in each PR. Do not begin the next component until the current PR is reviewed and merged. Planned components may be developed while the deployed stable POC remains usable.
 
 **Reason:** Small sequential PRs keep behavior changes reviewable, preserve a usable baseline and make regressions easier to isolate.
+
+## D-025 - Two-Account HTTP Basic Access
+
+**Status:** Accepted and implemented in `feat/private-poc-access`
+
+**Decision:** Protect the private POC with the fixed usernames `owner` and `friend`, backed by separate high-entropy passwords in server-side environment variables. Enforce the check in the application-wide Next.js proxy and repeat it inside `/api/analyze`. Do not add a database, identity provider or persistent session store.
+
+**Reason:** HTTP Basic over Railway-managed HTTPS is the smallest robust access boundary for two trusted users. Route-level enforcement ensures that protecting the page is not mistaken for protecting the Gemini-backed action. Distinct credentials can be rotated independently without adding a broader account system.
+
+## D-026 - Railway Railpack Deployment Target
+
+**Status:** Accepted and implemented in `feat/private-poc-access`; deployment occurs only after merge
+
+**Decision:** Target Railway's GitHub/Railpack flow. Start the production Next.js server on `0.0.0.0` using Railway's injected `PORT`, configure the public `/api/health` readiness check in the Railway service settings after merge, and retain the existing 100 MB application upload limit and 110-second analysis timeout. Do not commit Railway's deprecated legacy Config as Code format or introduce the newer stateful Infrastructure as Code workflow for this single service. This supersedes only the production-loopback portion of D-015; local development remains bound to `127.0.0.1`.
+
+**Reason:** Railway supports Node.js/Next.js, managed HTTPS, original-host forwarding, five-minute request-body uploads and five-minute inactive HTTP requests. Those limits fit REMI's current direct MP4 upload and Gemini analysis workflow without a container, object store or second backend.
+
+## D-027 - Proxy-Aware Same-Origin Validation
+
+**Status:** Accepted and implemented in `feat/private-poc-access`
+
+**Decision:** When both forwarded protocol and host are present, compare the browser `Origin` with that original public origin. Reject incomplete or invalid forwarded origin data and continue rejecting `Sec-Fetch-Site: cross-site`. Fall back to the direct request protocol and `Host` for local operation.
+
+**Reason:** Railway terminates HTTPS before forwarding to the Node.js service, so the internal request URL may not match the browser's public HTTPS origin. Using the paired forwarded values preserves CSRF protection behind the trusted production proxy without breaking local development.

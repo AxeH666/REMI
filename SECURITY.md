@@ -5,7 +5,9 @@ REMI processes unpublished creator videos. Treat every uploaded video as private
 ## Secrets
 
 - Store the Gemini key only in `.env.local`.
+- Treat the previously used Gemini key as compromised. Revoke it and create a new key for deployment.
 - Never use a variable beginning with `NEXT_PUBLIC_` for the key.
+- Keep `REMI_OWNER_PASSWORD` and `REMI_FRIEND_PASSWORD` server-side and give them different, randomly generated values.
 - Never commit `.env.local`, API keys or copied request headers.
 - Do not paste real API keys into issues, documentation, screenshots or chat.
 
@@ -37,23 +39,34 @@ The model is evaluating presentation quality, not providing medical care.
 - Do not recommend manipulation, shame, fear or overclaiming to increase engagement.
 - The UI should state that REMI provides creative feedback, not medical or platform-performance guarantees.
 
-## Before Sharing the App
+## Before Deploying the App
 
-Before exposing REMI outside the developer's machine, add authentication, abuse controls, upload isolation, deletion controls, rate limits and an explicit privacy notice. These are intentionally outside the current local version.
+Do not deploy an unmerged branch. After the private-access PR is reviewed and merged, configure a new Gemini key and both access passwords before making the Railway service public.
 
-The `dev` and `start` scripts bind Next.js to `127.0.0.1` so this unauthenticated proof of concept is not intentionally exposed to the local network. The analysis route also rejects browser requests from a different origin.
+The development script binds to `127.0.0.1`. The production script binds to `0.0.0.0` so Railway can reach its assigned `PORT`; private access must therefore remain configured and enabled in every deployed environment.
 
-## Planned Private POC Access
+## Private POC Access
 
-The first planned deployment is limited to the owner and one invited friend.
+The private deployment is limited to the owner and one invited friend.
 
-- Public anonymous users must not be able to invoke the Gemini-backed analysis route.
-- Authentication and authorization must be enforced server-side, not only by hiding interface controls.
-- Rate limiting or equivalent abuse controls must constrain API cost and automated misuse.
-- The Gemini API key must remain server-side in the deployed environment.
-- Deployment must not weaken current file validation, model-output validation, safe errors or cleanup behavior.
+- The fixed usernames are `owner` and `friend`; each has a distinct 24-128 character non-space printable-ASCII password.
+- HTTP Basic credentials are checked by the application-wide Next.js proxy and again inside the Gemini-backed analysis route.
+- Missing or invalid access configuration fails closed.
+- Unauthorized requests cannot reach request-body parsing or Gemini work.
+- The public `/api/health` endpoint returns only generic configuration readiness and never calls Gemini.
+- Protected responses disable shared caching and framing, suppress referrers and restrict browser camera, microphone and geolocation permissions.
+- The Gemini API key remains server-side in the deployed environment.
+- Existing file validation, model-output validation, safe errors, timeouts and provider cleanup remain unchanged.
 
-These controls are planned for `feat/private-poc-access`; they are not implemented today.
+High-entropy credentials are the abuse control for this two-person trusted-user POC. This is not a general-purpose account system: it has no password recovery, persistent sessions, audit history or distributed rate limiter. Rotate a credential and redeploy immediately if it is exposed. Browsers may cache Basic credentials, so shared-device users must close the private session or clear site credentials.
+
+## Railway Transport Boundary
+
+- Railway terminates public TLS and supplies the original HTTPS protocol and host through forwarded headers.
+- The analysis route uses those headers for its same-origin decision and continues to reject cross-site browser requests.
+- Use only the Railway HTTPS URL. Plain HTTP POST requests are converted to GET by Railway and cannot preserve video uploads.
+- The upload must complete within Railway's five-minute request-body window. REMI's current analysis timeout remains below Railway's five-minute inactive-request limit.
+- `/api/health` confirms configuration presence only; it does not validate credentials against Gemini or make a provider request.
 
 ## Planned Instagram Security
 

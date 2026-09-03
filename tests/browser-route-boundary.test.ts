@@ -32,6 +32,7 @@ describe("browser to analysis route boundary", () => {
     );
     const post = createPostHandler({
       analyzeVideo,
+      getAccessStatus: () => "authorized",
       getEnvironment: () => environment,
     });
     const fetchBridge = vi.fn<typeof fetch>(async (input, init) => {
@@ -82,5 +83,74 @@ describe("browser to analysis route boundary", () => {
       size: SYNTHETIC_VIDEO_BYTES,
       type: "video/mp4",
     });
+  });
+
+  it("accepts the public HTTPS origin supplied by a trusted production proxy", async () => {
+    const analyzeVideo = vi.fn<AnalyzeVideo>(
+      async (): Promise<AnalysisResult> => result,
+    );
+    const post = createPostHandler({
+      analyzeVideo,
+      getAccessStatus: () => "authorized",
+      getEnvironment: () => environment,
+    });
+    const publicOrigin = "https://remi-production.up.railway.app";
+    const request = new Request("http://internal-service:3000/api/analyze", {
+      body: (() => {
+        const formData = new FormData();
+        formData.append(
+          "video",
+          new File([new Uint8Array([1, 2, 3])], "reel.mp4", {
+            type: "video/mp4",
+          }),
+        );
+        formData.append("prompt", "Inspect the pacing.");
+        return formData;
+      })(),
+      headers: {
+        host: "internal-service:3000",
+        origin: publicOrigin,
+        "sec-fetch-site": "same-origin",
+        "x-forwarded-host": "remi-production.up.railway.app",
+        "x-forwarded-proto": "https",
+      },
+      method: "POST",
+    });
+
+    const response = await post(request);
+
+    expect(response.status).toBe(200);
+    expect(analyzeVideo).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects an origin that does not match the trusted proxy host", async () => {
+    const analyzeVideo = vi.fn<AnalyzeVideo>(
+      async (): Promise<AnalysisResult> => result,
+    );
+    const post = createPostHandler({
+      analyzeVideo,
+      getAccessStatus: () => "authorized",
+      getEnvironment: () => environment,
+    });
+    const formData = new FormData();
+    formData.append(
+      "video",
+      new File([new Uint8Array([1])], "reel.mp4", { type: "video/mp4" }),
+    );
+    formData.append("prompt", "Inspect the pacing.");
+    const request = new Request("http://internal-service:3000/api/analyze", {
+      body: formData,
+      headers: {
+        origin: "https://attacker.example",
+        "x-forwarded-host": "remi-production.up.railway.app",
+        "x-forwarded-proto": "https",
+      },
+      method: "POST",
+    });
+
+    const response = await post(request);
+
+    expect(response.status).toBe(403);
+    expect(analyzeVideo).not.toHaveBeenCalled();
   });
 });

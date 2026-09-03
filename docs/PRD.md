@@ -4,7 +4,8 @@
 
 **Name:** REMI  
 **Expansion:** Reel Evaluation & Moment Inspector  
-**Current stage:** Working local proof of concept
+**Current stage:** Private POC access implemented and awaiting review, merge and owner deployment.
+
 **Initial users:** The owner and one invited mental-health creator
 
 ## Product Purpose
@@ -21,7 +22,8 @@ The implemented local POC currently:
 - sends the complete video to Gemini for native visual and audio analysis;
 - returns a structured, timestamped critique validated by the application;
 - keeps the Gemini API key server-side;
-- has no authentication, deployment access, Instagram integration, persistent storage, creator memory or historical comparison; and
+- is ready for private Railway deployment with separate owner and friend credentials;
+- has no Instagram integration, persistent storage, creator memory or historical comparison; and
 - does not permanently store uploaded videos.
 
 The current application schema includes edit or reshoot instructions and numeric confidence. That behavior remains implemented until the planned critique-only contract PR changes the prompt, schema, UI and tests together. Planned behavior below must not be read as already implemented.
@@ -93,9 +95,9 @@ Provide useful states for a missing video or prompt, invalid type, oversized fil
 
 Each component is planned as a separate future PR in the order recorded in `ROADMAP.md`.
 
-### Planned: Private POC Access
+### Implemented: Private POC Access
 
-Deploy the existing POC so the owner and one invited friend can use it safely. Authentication and abuse controls must prevent public anonymous use of the API-backed analysis route. The Gemini API key remains server-side.
+`feat/private-poc-access` prepares the existing POC for Railway with two high-entropy HTTP Basic accounts. Authentication protects the whole application and is repeated inside the API-backed analysis route. The Gemini API key and access passwords remain server-side. Deployment is still a post-merge owner action.
 
 ### Planned: Critique-Only Contract
 

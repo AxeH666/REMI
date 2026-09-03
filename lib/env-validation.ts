@@ -8,6 +8,11 @@ export { DEFAULT_MAX_VIDEO_MB };
 const blankToUndefined = (value: unknown) =>
   typeof value === "string" && value.trim() === "" ? undefined : value;
 
+const geminiKeyPlaceholders = new Set([
+  "replace_with_your_key",
+  "replace_with_a_new_key",
+]);
+
 const maxVideoMbSchema = z.preprocess(
   blankToUndefined,
   z.coerce.number().int().positive().default(DEFAULT_MAX_VIDEO_MB),
@@ -22,7 +27,7 @@ const serverEnvironmentSchema = publicEnvironmentSchema.extend({
     .string()
     .trim()
     .min(1)
-    .refine((value) => value !== "replace_with_your_key"),
+    .refine((value) => !geminiKeyPlaceholders.has(value)),
   GEMINI_MODEL: z.preprocess(
     blankToUndefined,
     z.string().trim().min(1).default(DEFAULT_GEMINI_MODEL),

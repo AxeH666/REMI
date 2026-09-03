@@ -23,6 +23,8 @@ These three fields remain part of the software baseline only. Their tests must b
 
 ### Current API Route
 
+- Reject unauthenticated requests before origin checks, configuration loading, multipart parsing or Gemini work.
+- Repeat private-access authorization inside the route even though the application proxy also protects it.
 - Never return secrets.
 - Map provider errors to safe statuses and messages.
 - Repeat MIME type, file size, prompt and environment validation before provider work.
@@ -32,6 +34,18 @@ These three fields remain part of the software baseline only. Their tests must b
 - Return only the application-owned response envelope.
 
 All normal automated tests replace the Gemini boundary with a fake or mock and must fail if a real provider or network call is attempted.
+
+### Current Private Access and Deployment
+
+- Accept the independent `owner` and `friend` credentials.
+- Reject missing, malformed or incorrect Basic credentials.
+- Fail closed when either access password is missing, weak, placeholder or duplicated.
+- Challenge protected pages and return a structured `401` for protected APIs.
+- Keep immutable framework assets and the generic readiness endpoint outside the credential challenge.
+- Validate both access and Gemini runtime configuration before `/api/health` returns `200`.
+- Accept a same-origin production request when Railway supplies the public HTTPS protocol and host through forwarded headers.
+- Reject a mismatched origin before parsing the upload or calling Gemini.
+- Start the production server on an assigned port and confirm the health and authentication boundaries without making a real Gemini request.
 
 ## Current Creative Evaluation Method
 
@@ -66,13 +80,9 @@ Track timestamp accuracy, evidence quality, useful-explanation rate, forced-crit
 
 All sections below are **planned**. Each belongs to its named future PR and must be refined into automated and manual tests in that PR.
 
-### Planned: `feat/private-poc-access`
+### Implemented: `feat/private-poc-access`
 
-- Only the owner and invited friend can reach or invoke the deployed analysis workflow.
-- Anonymous users cannot consume the Gemini-backed API.
-- The Gemini API key never enters client code, responses or logs.
-- Access failures are safe and do not reveal account or infrastructure details.
-- The existing MP4-plus-question Gemini workflow remains usable after deployment.
+- Focused automated coverage now verifies the private-access criteria above. A post-merge deployment check must still confirm both accounts against the Railway HTTPS domain and verify that an unauthenticated analysis request returns `401` without contacting Gemini.
 
 ### Planned: `feat/critique-only-contract`
 
