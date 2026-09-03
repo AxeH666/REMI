@@ -91,3 +91,75 @@ Record material product and architecture decisions here. Do not rewrite history;
 **Status:** Accepted  
 **Decision:** Bind the `dev` and `start` scripts to `127.0.0.1` and reject cross-origin browser submissions to the analysis route.  
 **Reason:** Version 0 has no authentication or abuse controls. These local boundaries keep the API-key-backed route from being intentionally exposed to the network or invoked by an unrelated website, without introducing an authentication system.
+
+## D-016 - REMI Is a Critic, Not a Creative Director
+
+**Status:** Accepted; implementation planned in `feat/critique-only-contract`
+
+**Decision:** REMI will identify timestamped observable problems, explain likely viewer effects and cite visible or audible evidence. It will not rewrite scripts, invent hooks, prescribe edits or reshoots, direct personal expression, produce viral or confidence scores, force findings or claim causal certainty. Zero findings is valid. This supersedes the creative-solution requirement in D-002 and the accepted-edit metric in D-010; the current implementation remains unchanged until the owning feature PR.
+
+**Reason:** The product is most valuable as an evidence-based second set of eyes. Creative prescriptions overstep the role, reduce creator ownership and create false authority.
+
+## D-017 - Private Access Before Shared Use
+
+**Status:** Accepted; implementation planned in `feat/private-poc-access`
+
+**Decision:** Deploy the working POC only after access control prevents anonymous public use. Initial access is limited to the owner and one invited friend, and the Gemini API key remains server-side.
+
+**Reason:** A shared unauthenticated provider-backed endpoint creates privacy, abuse and cost risks.
+
+## D-018 - Deterministic Visual Timing Complements Gemini
+
+**Status:** Accepted; implementation planned in `feat/visual-timing-analysis`
+
+**Decision:** Preserve Gemini's complete-video inspection and add FFmpeg or equivalent deterministic preprocessing to detect visual changes, measure display intervals and supply relevant frames and timing facts. Do not lock a frame rate before testing. This extends rather than reverses the direct-analysis starting decision in D-007.
+
+**Reason:** Ordinary model inspection may miss sub-second images and cannot be relied on for exact display duration, while Gemini remains better suited to judging meaning and viewer effect.
+
+## D-019 - Separate Audio Facts From Sensory Judgment
+
+**Status:** Accepted; implementation planned in `feat/audio-sensory-analysis`
+
+**Decision:** Gemini will judge speech/music competition, distracting effects, emotional fit and combined sensory load. FFmpeg or equivalent tooling may supply measurable loudness, peak, clipping and timing facts.
+
+**Reason:** Deterministic measurements and human-like interpretation solve different parts of the problem and should remain distinguishable.
+
+## D-020 - Instagram Data Flows Through REMI's Backend
+
+**Status:** Accepted direction; API details require implementation research in `feat/instagram-connection`
+
+**Decision:** An eligible professional-account creator may eventually authorize REMI through Instagram's official API. REMI's backend—not Gemini—will handle authentication and retrieve that creator's own available Reels and Insights. No exact Meta permission, metric availability or review requirement is recorded as guaranteed.
+
+**Reason:** Backend mediation protects credentials, supports authorization boundaries and keeps external data provenance separate from model judgment. Meta requirements can change and must be verified when implemented.
+
+## D-021 - Creator-Isolated Memory Without Raw Video Retention
+
+**Status:** Accepted; implementation planned in `feat/creator-memory`
+
+**Decision:** Creator memory may store structured critiques, verified Instagram metrics, Reel purpose and format, posting date, duration, repeated observation tags, and model, prompt and schema versions. Raw videos are not retained permanently by default. All history is isolated per creator, with deletion and privacy controls required before broader use.
+
+**Reason:** Structured history can support useful longitudinal evidence while minimizing privacy risk. Mixing the friend's mental-health content with the owner's MMA, engineering or startup content would be irrelevant and unsafe.
+
+## D-022 - Fresh Critique Precedes Historical Comparison
+
+**Status:** Accepted; implementation planned in `feat/historical-comparison`
+
+**Decision:** Analyse every new unpublished Reel first without historical performance data. Run relevant same-creator history comparison only as a separate second stage that cannot overwrite the fresh critique. Describe repeated evidence with counts, not confidence scores. Historical associations may suggest that an issue contributed to weaker performance but must never be presented as proven causation.
+
+**Reason:** Separating the stages protects the direct evidence in the new Reel from hindsight and performance bias. Instagram distribution and other external factors prevent causal conclusions from observational history.
+
+## D-023 - Live Analysis Exclusions
+
+**Status:** Accepted
+
+**Decision:** Do not add generic viral datasets to live analysis, Gemini fine-tuning, virality prediction, universal cross-creator benchmarks, automatic creative rewriting, permanent raw-video storage, confidence scores, a full analytics dashboard or automatic Instagram posting. Public datasets may later support offline evaluation only.
+
+**Reason:** These additions do not improve the core critic role, create misleading certainty or broaden privacy and implementation risk before the central product is validated.
+
+## D-024 - One Planned Component Per PR
+
+**Status:** Accepted
+
+**Decision:** Keep `main` as the stable baseline. Develop all further work on branches, with one logical component and its tests and documentation in each PR. Do not begin the next component until the current PR is reviewed and merged. Planned components may be developed while the deployed stable POC remains usable.
+
+**Reason:** Small sequential PRs keep behavior changes reviewable, preserve a usable baseline and make regressions easier to isolate.

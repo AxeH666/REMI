@@ -17,10 +17,11 @@ Read these files in order:
 1. `docs/PRD.md`
 2. `docs/AI_ANALYSIS_CONTRACT.md`
 3. `docs/ARCHITECTURE.md`
-4. `docs/IMPLEMENTATION_PLAN.md`
-5. `docs/TEST_PLAN.md`
-6. `docs/DECISIONS.md`
-7. `SECURITY.md`
+4. `docs/ROADMAP.md`
+5. `docs/IMPLEMENTATION_PLAN.md`
+6. `docs/TEST_PLAN.md`
+7. `docs/DECISIONS.md`
+8. `SECURITY.md`
 
 If implementation and documentation disagree, stop and update the documentation or ask for a decision. Do not silently change scope.
 
@@ -115,3 +116,12 @@ The POC is done when:
 - After each milestone, run the relevant checks and report exactly what passed or failed.
 - Update `docs/DECISIONS.md` whenever a material architectural or product decision changes.
 - Do not broaden scope merely because an additional feature is easy.
+
+## Branch and PR Workflow
+
+- Treat `main` as the stable baseline.
+- Do all further work on a branch; do not develop directly on `main`.
+- Keep one logical component per PR.
+- Keep the tests and documentation for that component in the same PR.
+- Do not begin the next component until the current PR has been reviewed and merged.
+- Planned components may be developed while the deployed stable POC remains usable.

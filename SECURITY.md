@@ -39,6 +39,48 @@ The model is evaluating presentation quality, not providing medical care.
 
 ## Before Sharing the App
 
-Before exposing REMI outside the developer's machine, add authentication, abuse controls, upload isolation, deletion guarantees, rate limits and an explicit privacy notice. These are intentionally outside version 0.
+Before exposing REMI outside the developer's machine, add authentication, abuse controls, upload isolation, deletion controls, rate limits and an explicit privacy notice. These are intentionally outside the current local version.
 
 The `dev` and `start` scripts bind Next.js to `127.0.0.1` so this unauthenticated proof of concept is not intentionally exposed to the local network. The analysis route also rejects browser requests from a different origin.
+
+## Planned Private POC Access
+
+The first planned deployment is limited to the owner and one invited friend.
+
+- Public anonymous users must not be able to invoke the Gemini-backed analysis route.
+- Authentication and authorization must be enforced server-side, not only by hiding interface controls.
+- Rate limiting or equivalent abuse controls must constrain API cost and automated misuse.
+- The Gemini API key must remain server-side in the deployed environment.
+- Deployment must not weaken current file validation, model-output validation, safe errors or cleanup behavior.
+
+These controls are planned for `feat/private-poc-access`; they are not implemented today.
+
+## Planned Instagram Security
+
+Instagram integration is planned, not implemented.
+
+- REMI's backend must perform authorization, token exchange, token refresh or renewal, and API retrieval. Gemini must never receive Instagram credentials.
+- Tokens must be encrypted at rest, excluded from client responses and logs, and scoped to the creator who authorized them.
+- OAuth state and redirect handling must prevent account mix-ups and request forgery.
+- Revocation, expiry and authorization removal must stop subsequent access cleanly.
+- Exact Meta permissions, eligible account requirements, token lifecycle and app-review requirements must be verified from current official Meta documentation during the implementation PR. This document does not assert permission names or API guarantees.
+
+## Planned Creator Data Isolation
+
+Creator memory and historical comparison are planned, not implemented.
+
+- Every stored Reel record, critique, metric and observation tag must belong to one authenticated creator identity.
+- Authorization must be applied to every read, write, comparison and deletion operation.
+- The invited friend's mental-health content must never be compared with or exposed to the owner's MMA, engineering or startup content.
+- Verified Instagram metrics must remain distinguishable from model-generated observations.
+- Model, prompt and schema versions must be retained with each stored critique so later comparisons remain auditable.
+- Cross-creator isolation requires automated tests before creator memory is used.
+
+## Planned Retention and Deletion
+
+- Do not permanently retain raw Reel videos by default.
+- Store only the creator-specific structured data needed for critique history and relevant comparison.
+- Define and document retention periods for tokens, structured critiques, metrics and derived frames or audio facts before broader access.
+- Treat extracted frames, audio segments and other derivatives as sensitive creator content; keep them temporary unless a separately approved requirement says otherwise.
+- Provide creator-visible deletion and privacy controls before REMI becomes a broader product.
+- Deletion design must cover application records, derived artifacts, provider files and revoked external tokens, while accurately disclosing any best-effort provider limitation.

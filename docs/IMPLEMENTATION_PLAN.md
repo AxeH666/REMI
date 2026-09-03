@@ -1,5 +1,11 @@
 # Implementation Plan
 
+## Document Status
+
+This file records the original local POC implementation sequence. It is not the plan for the newly approved components. The repository contains the working Gemini integration and its reliability tests; no product implementation is part of the current documentation PR.
+
+Future component order, branch names and PR boundaries are defined in `ROADMAP.md`.
+
 ## Milestone 0 - Documentation Baseline
 
 - Review all project documents.
@@ -63,14 +69,8 @@ Exit condition: documented definition of done is satisfied.
 
 Exit condition: a written evidence-based build/no-build decision.
 
-## Deferred Milestones
+## Superseded Deferred List
 
-Only after successful evaluation:
+The earlier informal deferred list has been replaced by the approved roadmap in `ROADMAP.md`. That roadmap separates private access, the critique-only contract, deterministic visual timing, audio and sensory-load analysis, Instagram connection, creator memory and two-stage historical comparison into individual planned PRs.
 
-1. feedback buttons and accepted-edit tracking;
-2. compare two versions;
-3. creator history;
-4. Insights screenshots;
-5. objective video/audio preprocessing;
-6. authentication and private sharing.
-
+The roadmap does not approve feedback buttons, accepted-edit tracking, version comparison, a full analytics dashboard or automatic posting.
