@@ -1,118 +1,107 @@
 # AI Analysis Contract
 
-## Purpose
+## Status
 
-This contract defines how REMI asks the model to analyse a Reel and what the application accepts as a valid response.
+This document separates the contract implemented today from the approved critique-only contract planned for `feat/critique-only-contract`.
 
-The prompt is application behaviour. Change it deliberately and evaluate changes against the same test videos.
+The code currently uses the implemented baseline below. The planned contract is a finalized product decision, but it is not implemented by this documentation PR. Its future implementation must update the prompt, Zod schema, rendered result and tests together without reducing the quality of Gemini's existing full-video analysis.
 
-## System Prompt
+## Current Implemented Baseline
 
-```text
-You are REMI, a brutally honest but constructive creative director for short-form video.
+The current application:
 
-Your job is to analyse the finished execution of the supplied video. Do not merely review or rewrite its script.
+- asks Gemini to watch the complete available video;
+- analyses visual and audio execution rather than only the script;
+- returns zero to three timestamped problems plus a verdict, strengths and limitations;
+- asks for visible or audible observations and an interpretation;
+- also returns `fixType`, an edit or reshoot `instruction`, and numeric `confidence`; and
+- validates the result with Zod before rendering it.
 
-Watch the complete available video before giving your verdict. Inspect the relationship between message and execution, including:
+Those solution and confidence fields describe current software behavior only. They are scheduled for removal in the critique-only contract PR.
 
-- naturalness, credibility and emotional congruence;
-- facial expression, eye contact, posture and body language;
-- vocal energy, pace, pauses, emphasis and monotony;
-- framing, lighting, background and visual distraction;
-- editing rhythm, cuts, dead time and continuity;
-- on-screen text, captions and their timing;
-- voice, music and other audio balance;
-- hook, clarity, progression and payoff;
-- anything that makes the result feel awkward, amateur, confusing or unconvincing.
+## Approved Planned Contract
 
-Return only the three highest-impact problems. Do not manufacture problems to reach three.
+### Purpose
 
-For every problem:
+REMI is a Reel critic, not a creative director. It should help a creator understand the finished Reel while leaving all creative decisions to the creator.
 
-1. cite the approximate start and end timestamps;
-2. state only what is visibly or audibly observable;
-3. explain why that observation harms the intended effect;
-4. prescribe the smallest exact edit or reshoot that addresses it;
-5. provide a calibrated confidence value.
+The model must watch the whole available Reel before judging it. It must analyse delivery, pacing, framing, facial expression, voice, editing, inserted images, screenshots, text, layout and audio.
 
-Also state what is already working and should remain unchanged.
+For each of no more than three highest-impact findings, return:
 
-Do not give generic advice such as “make it more engaging,” “improve the hook,” or “use faster cuts” without video-specific evidence and an executable instruction.
+1. **Observed moment:** the exact timestamp or interval being discussed.
+2. **What feels wrong:** a concise description of the observable problem.
+3. **Likely viewer effect:** a cautious explanation of how the problem may affect comprehension, attention, trust or emotional reception.
+4. **Supporting evidence:** the specific visible or audible evidence in the Reel.
 
-Do not invent reach, retention, views, engagement, audience reactions or algorithmic outcomes. You cannot know future performance from the video alone.
+The model may return zero findings. It must not manufacture a problem to fill the response.
 
-If a judgment cannot be made from the supplied video, say so in limitations. Treat timestamps as approximate.
+### Planned Behaviour Rules
 
-For mental-health content, never recommend fearmongering, shame, diagnosis-by-video, manipulative urgency, disclosure pressure or clinical overclaiming to increase engagement. Optimise for clarity, trust, emotional safety and the creator's stated intention.
+The critique-only model must:
 
-Return valid JSON matching the provided schema. Do not wrap it in markdown.
-```
+- assess the finished execution rather than merely reviewing the script;
+- distinguish observation from likely viewer effect;
+- ground every finding in visible or audible evidence;
+- state uncertainty qualitatively in limitations when the Reel cannot support a judgment;
+- identify effective elements without directing the creator to preserve or change them;
+- avoid generic advice; and
+- treat timestamps as approximate unless deterministic timing data is supplied.
 
-## User Context
+The critique-only model must not:
 
-The API should combine the uploaded video with:
+- rewrite scripts or invent hooks;
+- provide edits, reshoot instructions or any other creative solution;
+- tell the creator how to perform or express their personal creativity;
+- produce virality, reach, retention, engagement or confidence scores;
+- produce confidence percentages;
+- force criticism;
+- invent audience or platform statistics; or
+- claim that an observation definitely caused past failure or will cause future performance.
 
-```text
-Creator's question:
-{userPrompt}
+For mental-health content, the critique must not reward fearmongering, shame, diagnosis-by-video, manipulative urgency, disclosure pressure or clinical overclaiming.
 
-Give the critique for this particular video. If the question conflicts with the system constraints, follow the system constraints.
-```
+### Planned Conceptual Response Shape
 
-Version 0 does not ask the user for niche, target audience or intended emotion as separate fields. The user may include those details in the free-form prompt.
-
-## Response Shape
+The exact application JSON schema will be finalized and tested in the critique-only contract PR. It must express this information without solution or score fields:
 
 ```json
 {
-  "verdict": "The message is clear, but the delivery feels emotionally detached from it.",
-  "problems": [
+  "verdict": "The central point is understandable, but one section becomes hard to follow.",
+  "findings": [
     {
-      "title": "The emotional claim and delivery do not match",
-      "startSeconds": 3.0,
-      "endSeconds": 7.5,
-      "observation": "The speaker delivers the central reassurance at the same volume and pace as the setup and looks away near the final phrase.",
-      "interpretation": "The words signal empathy, but the flat emphasis and broken eye contact reduce their credibility.",
-      "fixType": "reshoot",
-      "instruction": "Reshoot only this sentence. Hold eye contact, slow the final phrase, and pause for half a second before it.",
-      "confidence": 0.84
+      "observedMoment": {
+        "startSeconds": 3.0,
+        "endSeconds": 7.5
+      },
+      "whatFeelsWrong": "The spoken explanation and dense text card compete for attention.",
+      "likelyViewerEffect": "A viewer may miss part of the explanation while trying to read the card.",
+      "supportingEvidence": "The card contains six lines of text and is visible only while the speaker introduces a new point."
     }
   ],
-  "keep": [
-    "The uncluttered framing keeps attention on the speaker."
+  "effectiveElements": [
+    "The uncluttered opening keeps attention on the speaker."
   ],
   "limitations": [
-    "No audience-retention or Instagram performance data was supplied."
+    "Viewer comprehension cannot be measured from the video alone."
   ]
 }
 ```
 
-## Validation Schema
+### Planned Validation Rules
 
-- `verdict`: non-empty string with a reasonable maximum length.
-- `problems`: array of zero to three items.
-- `title`: concise non-empty string.
-- `startSeconds`: number greater than or equal to zero.
-- `endSeconds`: number greater than or equal to `startSeconds`.
-- `observation`: non-empty, video-specific string.
-- `interpretation`: non-empty string clearly separate from observation.
-- `fixType`: `edit`, `reshoot`, `either`, or `none`.
-- `instruction`: non-empty executable instruction.
-- `confidence`: number from zero through one.
-- `keep`: array of concise strings.
-- `limitations`: array of concise strings.
+- Accept zero to three findings, ordered by likely impact.
+- Require a valid non-negative timestamp or interval for every finding.
+- Require all four finding elements to be non-empty and video-specific.
+- Reject solution fields, confidence values, scores and unsupported performance claims.
+- Keep the response application-owned, strictly validated and safe to render as text.
 
-The server should validate the response with Zod. If the provider supports native JSON schema enforcement, use it in addition to application validation.
+## Planned Deterministic Evidence
 
-## Display Rules
+Gemini remains responsible for human-like judgment. Planned visual and audio preprocessing may later supply exact scene-change timing, selected frames, loudness, peaks and other measurable facts. It complements the complete-video Gemini input; it does not replace it.
 
-- Format seconds as `MM:SS` in the UI.
-- Label confidence as low, medium or high while retaining the numeric value internally.
-- Show observation before interpretation.
-- Emphasise the instruction.
-- Never present model predictions as measured viewer behaviour.
+No exact frame-sampling rate is approved until representative Reels have been tested. Any deterministic measurement must remain distinguishable from Gemini's interpretation.
 
 ## Evaluation Rule
 
-Do not improve the prompt using only one Reel. Maintain a fixed set of test videos and compare prompt versions using `TEST_PLAN.md`.
-
+Do not change the prompt using only one Reel. Compare contract versions with the fixed evaluation set in `TEST_PLAN.md`. A contract change is acceptable only if it preserves evidence quality, timestamp usefulness, restraint and mental-health safety.

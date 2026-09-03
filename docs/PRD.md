@@ -4,45 +4,65 @@
 
 **Name:** REMI  
 **Expansion:** Reel Evaluation & Moment Inspector  
-**Stage:** Local proof of concept  
-**Primary users:** The developer and one mental-health creator
+**Current stage:** Working local proof of concept
+**Initial users:** The owner and one invited mental-health creator
 
-## Problem
+## Product Purpose
 
-A creator can write a reasonable script yet produce a finished Reel that feels awkward, unconvincing, slow or amateur. A human viewer may sense the problem without being able to identify its cause or prescribe an edit.
+A creator can finish a Reel that feels awkward, confusing, slow or emotionally wrong without being able to identify the moment that creates that impression. Most creator tools report metrics or repeat generic advice. REMI exists to inspect the actual finished execution and articulate what a viewer can see or hear.
 
-Most creator tools report metrics or repeat generic rules such as “improve the hook.” They do not reliably explain what is wrong with the actual filmed execution.
+REMI is a Reel critic, not a creative director. It protects the creator's ownership of the solution and personal style.
 
-## Goal
+## Current Working Baseline
 
-Determine whether multimodal video AI can:
+The implemented local POC currently:
 
-1. articulate why a finished Reel feels wrong;
-2. cite the exact moments that support the diagnosis;
-3. give corrections the creator can execute;
-4. preserve effective parts of the Reel instead of rewriting everything.
+- accepts one completed MP4 Reel and one user question;
+- sends the complete video to Gemini for native visual and audio analysis;
+- returns a structured, timestamped critique validated by the application;
+- keeps the Gemini API key server-side;
+- has no authentication, deployment access, Instagram integration, persistent storage, creator memory or historical comparison; and
+- does not permanently store uploaded videos.
 
-## Non-Goal
+The current application schema includes edit or reshoot instructions and numeric confidence. That behavior remains implemented until the planned critique-only contract PR changes the prompt, schema, UI and tests together. Planned behavior below must not be read as already implemented.
 
-Version 0 is not intended to prove that AI can predict reach or virality. Reach depends on factors that are unavailable before posting and cannot be inferred reliably from the video alone.
+## Finalized Product Role
 
-## Core User Story
+For each meaningful problem, REMI should:
 
-> As a creator, I upload a Reel and ask why it feels wrong so that I receive specific, timestamped edit or reshoot instructions before posting it.
+- identify the exact timestamp or interval where something feels wrong;
+- describe the observable problem;
+- explain its likely effect on the viewer; and
+- cite supporting evidence visible or audible in the Reel.
 
-## Primary Workflow
+REMI should inspect delivery, pacing, framing, facial expression, voice, editing, inserted images, screenshots, text, layout and audio. It must be allowed to return no findings when no meaningful problem is supported by the Reel.
 
-1. User opens the local application.
-2. User selects an MP4 Reel.
-3. User enters or edits the analysis question.
-4. User submits the form.
-5. The application validates and uploads the video to Gemini.
-6. Gemini analyses the video using the REMI analysis contract.
-7. The application validates the structured response.
-8. The results page displays the critique.
-9. The user manually decides which recommendations are correct and useful.
+REMI should not:
 
-## Functional Requirements
+- rewrite scripts or invent hooks;
+- provide creative edit or reshoot instructions;
+- tell the creator how to express their personal creativity;
+- produce viral scores;
+- produce confidence scores or percentages;
+- force criticism when the Reel is already effective; or
+- claim that one issue definitely caused a Reel to fail.
+
+## Current User Story
+
+> As a creator, I upload a completed Reel and ask why it feels wrong so that I receive a specific, timestamped explanation before deciding what, if anything, to change.
+
+## Current Workflow
+
+1. The user opens the local application.
+2. The user selects one MP4 Reel.
+3. The user enters or edits the analysis question.
+4. The application validates and uploads the video to Gemini.
+5. Gemini analyses the complete video using the implemented contract.
+6. The application validates the structured response.
+7. The interface displays the critique.
+8. The user decides what the evidence means for their own creative work.
+
+## Current Functional Requirements
 
 ### Upload
 
@@ -53,83 +73,92 @@ Version 0 is not intended to prove that AI can predict reach or virality. Reach 
 
 ### Prompt
 
-- Provide a useful default prompt: `Why does this Reel feel wrong?`
+- Provide the default question `Why does this Reel feel wrong?`.
 - Allow free-form editing.
 - Require a non-empty prompt with a sensible maximum length.
 
 ### Analysis
 
 - Send the complete video and prompt to Gemini.
-- Apply the system instructions in `AI_ANALYSIS_CONTRACT.md`.
-- Request the documented JSON structure.
+- Use the contract in `AI_ANALYSIS_CONTRACT.md`.
+- Request and validate structured JSON.
 - Handle long-running upload and analysis states.
-
-### Results
-
-Display:
-
-- overall verdict;
-- up to three highest-impact problems;
-- timestamp range for every problem;
-- observed evidence;
-- interpretation;
-- exact edit or reshoot instruction;
-- confidence and uncertainty;
-- what should remain unchanged;
-- analysis limitations.
+- Preserve the quality of the existing native Gemini video analysis as planned components are added.
 
 ### Error Handling
 
-Provide useful states for:
+Provide useful states for a missing video or prompt, invalid type, oversized file, missing configuration, provider failure or timeout, and invalid model output.
 
-- no video;
-- empty prompt;
-- invalid type;
-- oversized file;
-- provider upload failure;
-- provider analysis failure or timeout;
-- invalid or incomplete model JSON;
-- missing environment configuration.
+## Approved Planned Components
+
+Each component is planned as a separate future PR in the order recorded in `ROADMAP.md`.
+
+### Planned: Private POC Access
+
+Deploy the existing POC so the owner and one invited friend can use it safely. Authentication and abuse controls must prevent public anonymous use of the API-backed analysis route. The Gemini API key remains server-side.
+
+### Planned: Critique-Only Contract
+
+Replace creative direction, scores and forced findings with four evidence-based elements: observed moment, what feels wrong, likely viewer effect, and supporting visible or audible evidence.
+
+### Planned: Visual Timing and Layout Analysis
+
+Inspect inserted images, screenshots, text cards, captions, cropping, unreadable text, clutter, rapid cuts, sub-second images, overlong images and whether viewers have enough time to understand an image.
+
+Gemini's ordinary video inspection may miss sub-second visuals. A planned deterministic preprocessing step using FFmpeg or an equivalent tool will detect visual changes, measure exact display intervals and provide relevant frames and timing facts to Gemini. No exact sampling frame rate is approved until it has been tested.
+
+### Planned: Audio and Sensory-Load Analysis
+
+Inspect music competing with speech, distracting effects, sudden volume changes, clipping, excessive loudness, emotionally conflicting music and combined visual/audio overload. Gemini provides human-like judgment; deterministic tooling may provide measurable loudness, peak and timing facts.
+
+### Planned: Instagram Connection
+
+Allow a creator with an eligible professional Instagram account to authorize REMI through Instagram's official API. REMI's backend—not Gemini directly—will handle authentication and retrieval of that creator's own Reels and available Insights.
+
+Exact Meta permissions, eligible account requirements, available metrics and app-review requirements remain implementation research. They are not guaranteed in this document.
+
+### Planned: Creator Memory
+
+Store creator-specific structured critiques, verified Instagram performance metrics, purpose and format, posting date and duration, repeated observation tags, and model, prompt and schema versions.
+
+Raw Reel videos will not be retained permanently by default. Every creator's history must be isolated. The invited friend's mental-health content must never be compared with the owner's MMA, engineering or startup content. Deletion and privacy controls are required before broader availability.
+
+### Planned: Historical Comparison
+
+Analyse a new unpublished Reel in two stages:
+
+1. Produce a fresh critique without historical performance data.
+2. Run a separate comparison using only relevant Reels from that creator's isolated history.
+
+History may add context but must not overwrite or bias the fresh critique. Report evidence with counts such as `Observed in 4 of 6 comparable Reels.` Do not use confidence scores. REMI may say that a problem appeared repeatedly in weaker-performing Reels or may have contributed to performance; it must not claim proven causation because Instagram distribution and other external factors also affect reach.
+
+## Explicitly Deferred or Rejected
+
+REMI is not currently adding:
+
+- generic viral-content datasets to live analysis;
+- fine-tuning Gemini;
+- virality prediction;
+- universal benchmarks that mix unrelated creators;
+- automatic creative rewriting;
+- permanent raw-video storage;
+- confidence scores;
+- a full analytics dashboard; or
+- automatic posting to Instagram.
+
+Public datasets may later support offline evaluation, but they will not be the source of truth for personal critique.
 
 ## Quality Requirements
 
-- The response should take less than two minutes for an ordinary short Reel under normal conditions; this is a target, not a guaranteed SLA.
-- Mobile usability is helpful but desktop Windows Chrome is the required environment.
-- No permanent application storage.
-- No raw model HTML.
-- Accessible labels, focus states and error messages.
+- An ordinary short Reel should usually return within two minutes under normal conditions; this is a target, not a guaranteed SLA.
+- Desktop Windows Chrome remains the required current environment.
+- Model output is untrusted and must be validated before display.
+- No raw model HTML or sensitive provider details reach the interface.
+- Mental-health critique must not reward fearmongering, shame, diagnosis-by-video, disclosure pressure, manipulation or clinical overclaiming.
+- Planned components must preserve or measurably improve the usefulness of the existing Gemini analysis.
 
-## AI Quality Bar
+## Product Validation
 
-A critique fails if it:
+Evaluate approximately ten varied Reels, including effective Reels where zero findings is the correct result. Measure timestamp accuracy, evidence quality, usefulness of the explanation, false or forced criticism, hallucinations, domain safety and repeat-run directional consistency.
 
-- gives advice applicable to almost any Reel;
-- rewrites the script without analysing execution;
-- references a moment not present in the video;
-- invents retention or performance statistics;
-- recommends constant faster cuts without explaining why;
-- provides a vague fix such as “be more engaging”;
-- pushes unsafe or manipulative mental-health messaging.
-
-## Success Criteria
-
-Test approximately ten Reels. The POC is promising if:
-
-- at least 70% of returned timestamp references are materially correct;
-- at least 60% of the top-three recommendations are accepted as useful by the creator;
-- at least half of the analysed Reels contain one insight the reviewer felt but could not previously articulate;
-- hallucinated video events or statistics are rare and immediately visible;
-- repeat analysis with the same inputs is directionally consistent.
-
-These thresholds are provisional. Record the raw evaluations; do not tune results to claim success.
-
-## Future Scope, Only After Validation
-
-- recommendation feedback and accepted-edit tracking;
-- compare two versions of a Reel;
-- creator-specific memory;
-- historical Reels and Insights screenshots;
-- objective frame, audio and transcript extraction;
-- authentication and private deployment;
-- Instagram integration.
-
+The thresholds remain learning tools rather than marketing claims. Historical performance can support comparison but cannot prove why a Reel succeeded or failed.

@@ -2,27 +2,37 @@
 
 **Reel Evaluation & Moment Inspector**
 
-REMI is a local proof of concept that accepts a short-form video and a natural-language question such as:
+REMI is a local proof of concept for inspecting a completed short-form Reel. A user submits one MP4 and one natural-language question; Gemini inspects the video's visual and audio streams and REMI returns a validated, timestamped critique.
 
-> Why does this Reel feel bad after shooting?
+## Current Status
 
-Gemini returns a concise creative-director critique with timestamps, evidence and exact edit or reshoot instructions.
+The working baseline currently:
 
-## Current Implementation
+- accepts one completed MP4 Reel and one user question;
+- sends both to Gemini through a server-only Next.js route;
+- uses Gemini's native video-and-audio analysis;
+- validates structured output with Zod before rendering it;
+- shows timestamped observations, a verdict, strengths and limitations; and
+- does not permanently store uploaded videos.
 
-Milestone 3 connects the complete interface to a server-only Gemini workflow. The app validates the MP4 and prompt in the browser and again in the API route, uploads the video with the official Google Gen AI SDK, waits for the provider file to become ready, validates the structured response with Zod, and renders only the application-owned result shape.
+The current response schema still includes edit or reshoot instructions and numeric confidence. Those fields are part of the implemented baseline, not the finalized product direction. The planned `feat/critique-only-contract` PR will remove them while preserving the quality of the working Gemini analysis.
 
-Fixtures remain test data only. The running application does not return fixture results or add an artificial wait.
+REMI does not currently have authentication, deployment access, Instagram integration, persistent storage, creator memory or historical comparison. Planned components are described in the [roadmap](docs/ROADMAP.md); they are not implemented.
 
-## Current Scope
+## Product Direction
 
-Version 0 does one thing:
+REMI is a Reel critic, not a creative director. Its job is to identify an exact moment, describe the observable problem, explain the likely viewer effect and cite visible or audible evidence. It may report that no meaningful problem was found.
+
+REMI will not rewrite scripts, invent hooks, direct the creator's personal expression, prescribe edits or reshoots, produce viral or confidence scores, force criticism or claim that one issue definitely caused poor performance.
+
+## Current Workflow
 
 ```text
-Upload MP4 + enter prompt -> Gemini analysis -> structured critique
+Upload one MP4 + enter one question
+    -> server-side Gemini video-and-audio analysis
+    -> Zod-validated structured critique
+    -> safe rendered result
 ```
-
-It does not predict reach, connect to Instagram, remember previous Reels or permanently store videos.
 
 ## Stack
 
@@ -38,8 +48,9 @@ It does not predict reach, connect to Instagram, remember previous Reels or perm
 - [Product requirements](docs/PRD.md)
 - [AI analysis contract](docs/AI_ANALYSIS_CONTRACT.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
-- [Test plan](docs/TEST_PLAN.md)
+- [Test and evaluation plan](docs/TEST_PLAN.md)
 - [Decision log](docs/DECISIONS.md)
 - [Security and privacy](SECURITY.md)
 
@@ -66,16 +77,14 @@ npm install
 npm run dev
 ```
 
-Then open the local URL printed by Next.js (normally `http://127.0.0.1:3000`). If port 3000 is already in use, stop the conflicting local service or set an available port before starting:
+Then open the local URL printed by Next.js, normally `http://127.0.0.1:3000`. If port 3000 is already in use, stop the conflicting local service or set an available port before starting:
 
 ```powershell
 $env:PORT = "3001"
 npm run dev
 ```
 
-The package configuration supports Node.js 22 from 22.14.0 onward and Node.js
-24 or later. Node.js 23 is excluded because the current test environment does
-not support that non-LTS release line.
+The package configuration supports Node.js 22 from 22.14.0 onward and Node.js 24 or later. Node.js 23 is excluded because the current test environment does not support that non-LTS release line.
 
 `GEMINI_API_KEY` is required when an analysis is submitted. `GEMINI_MODEL` defaults to `gemini-3.7-flash`, and `MAX_VIDEO_MB` defaults to `100` when those optional values are blank. Invalid server configuration produces a safe browser error without exposing the key or configuration details.
 
@@ -84,9 +93,9 @@ not support that non-LTS release line.
 1. Select one non-empty MP4 no larger than the configured limit.
 2. Review or edit the default question.
 3. Submit the form and leave the local server running while Gemini processes the video.
-4. Review the validated verdict, timestamped problems, strengths and limitations.
+4. Review the validated critique.
 
-The selected file stays in the browser until submission. On submit, the server sends it to Gemini for analysis. REMI does not use permanent app storage. It asks Gemini to delete the uploaded provider file after every completed or failed attempt, but that deletion is best effort; see [Security and privacy](SECURITY.md) before using sensitive material.
+The selected file stays in the browser until submission. On submit, the server sends it to Gemini for analysis. REMI does not use permanent application storage. It asks Gemini to delete the uploaded provider file after every completed or failed attempt, but that deletion is best effort; see [Security and privacy](SECURITY.md) before using sensitive material.
 
 ## Local Checks
 
@@ -99,6 +108,4 @@ npm run build
 
 ## Validation Goal
 
-REMI succeeds when its critique consistently helps a creator articulate and fix problems they could previously only feel.
-
-The first product metric is **accepted-edit rate**, not predicted reach.
+REMI succeeds when its critique consistently helps a creator understand problems they could previously only feel, without taking over the creator's creative decisions.
