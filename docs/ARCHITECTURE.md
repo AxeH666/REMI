@@ -10,8 +10,11 @@
 
 ```text
 Windows browser
-    -> loopback-only Next.js page
+    -> Railway HTTPS edge (production)
+    -> Next.js private-access proxy
+    -> Next.js page
     -> server-side Next.js analysis route
+    -> route-level private-access check
     -> Gemini Files API / native video-and-audio input
     -> Gemini structured analysis
     -> Zod validation
@@ -25,6 +28,17 @@ Windows browser
 - Submits multipart form data and shows progress and safe errors.
 - Renders only the application-owned validated result.
 - Never receives the Gemini API key.
+
+### Current Private Access
+
+- Uses HTTP Basic authentication with the fixed usernames `owner` and `friend` and separate high-entropy passwords supplied through server-side environment variables.
+- Runs an application-wide Next.js `proxy.ts` check before protected page and API requests.
+- Repeats the authorization check inside `/api/analyze`, so bypassing or misconfiguring the page-level boundary does not expose the provider-backed action.
+- Fails closed with a generic `503` response when access configuration is absent or invalid.
+- Sends no-store, anti-framing, no-referrer and restrictive browser-permission headers on protected responses.
+- Leaves only immutable Next.js assets and `/api/health` outside the credential challenge. The health endpoint exposes only generic readiness.
+
+This design is intentionally limited to two trusted users. It adds no account database, password-reset flow or persistent session store.
 
 ### Current Server Route
 
@@ -41,8 +55,8 @@ Gemini inspects the complete supplied visual and audio streams, cites approximat
 
 ### Current Storage and Access Boundary
 
-- There is no authentication or deployed shared access.
-- Development and production-start scripts bind to `127.0.0.1`.
+- The application is ready for private remote deployment but is not deployed by this PR.
+- Development binds to `127.0.0.1`; production binds to `0.0.0.0` and uses the platform-assigned `PORT`.
 - There is no database or permanent application video storage.
 - The multipart `File` is uploaded directly as a `Blob`; REMI does not create a local temporary video copy.
 - Provider deletion is best effort and does not guarantee immediate removal after a network or provider failure.
@@ -62,9 +76,23 @@ The current implementation uses the Gemini Files API through `@google/genai` 2.2
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-3.7-flash
 MAX_VIDEO_MB=100
+REMI_OWNER_PASSWORD=
+REMI_FRIEND_PASSWORD=
 ```
 
-`GEMINI_MODEL` and `MAX_VIDEO_MB` have validated server-side defaults. Provider limits must be verified during any implementation change rather than inferred from the example values.
+`GEMINI_MODEL` and `MAX_VIDEO_MB` have validated server-side defaults. The Gemini key and both distinct access passwords are required at runtime. Provider limits must be verified during any implementation change rather than inferred from the example values.
+
+## Current Railway Boundary
+
+Railway Railpack detects and builds the existing Node.js application, then starts `npm run start`. Railway injects `PORT`; the production server listens on all container interfaces. The service's Railway dashboard configuration must set `/api/health` as its readiness check.
+
+No legacy `railway.json` or `railway.toml` file is used because Railway has deprecated that format. Railway's newer stateful Infrastructure as Code workflow would add unnecessary project-specific deployment state for this single-service POC, so deployment settings remain an explicit post-merge owner action.
+
+Railway terminates public TLS and supplies `X-Forwarded-Proto` and `X-Forwarded-Host`. The analysis route uses those values to compare the browser's `Origin` with the original public origin, while still rejecting `Sec-Fetch-Site: cross-site`. Local requests without forwarded headers retain the existing host-based check.
+
+Railway currently requires request bodies to finish within five minutes and closes inactive HTTP requests after five minutes. REMI's 100 MB application limit and 110-second analysis timeout remain unchanged. A user still needs enough upload bandwidth to send the selected file inside Railway's upload window.
+
+The deployment target is Railway Hobby or higher, not the Free plan's current 0.5 GB memory ceiling. The route materializes multipart input in the Node.js process before the Gemini upload, so peak memory must be measured with a representative near-limit video after deployment before applying a service resource cap.
 
 ## Approved Future Architecture
 
@@ -83,9 +111,9 @@ Owner or invited creator
          -> separate relevant-history comparison second
 ```
 
-### Planned Private POC Access
+### Implemented Private POC Access
 
-Deploy the existing POC for the owner and one invited friend. Access control, rate limiting or equivalent abuse protection must prevent anonymous public consumption of the API-backed route. `GEMINI_API_KEY` remains server-side. Deployment must preserve the existing working analysis path.
+The private-access component is implemented in `feat/private-poc-access` and becomes the stable baseline when merged. Deployment itself remains a post-merge owner action. High-entropy credentials prevent anonymous public consumption of the API-backed route, and `GEMINI_API_KEY` remains server-side.
 
 ### Planned Critique-Only Contract
 

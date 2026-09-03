@@ -2,21 +2,23 @@
 
 ## Status
 
-This roadmap records approved future components. None of them is implemented by the documentation-only PR that created this file.
+This roadmap records the ordered REMI components. Private POC access is implemented by `feat/private-poc-access` and becomes part of the stable baseline when that PR is merged. Later components remain planned and are not implemented.
 
 `main` is the stable baseline. Each component below must be developed on its named branch as one logical PR, with its tests and documentation included. Do not begin the next component until the current PR has been reviewed and merged. A deployed stable POC may remain usable while a planned component is developed separately.
 
 ## Current Baseline to Preserve
 
-Today REMI accepts one completed MP4 and one question, sends the full video to Gemini for native video-and-audio analysis, validates a structured timestamped critique and does not permanently store the uploaded video.
+Today REMI accepts one completed MP4 and one question, sends the full video to Gemini for native video-and-audio analysis, validates a structured timestamped critique and does not permanently store the uploaded video. The private-access PR adds deployment readiness and two-user access without changing that analysis behavior.
 
-It does not currently provide shared deployment access, authentication, Instagram integration, persistent creator data, creator memory or historical comparison. The current response still contains edit/reshoot instructions and numeric confidence; those remain until the second roadmap PR changes the prompt, schema, UI and tests together.
+Deployment remains an explicit post-merge owner action. REMI still has no Instagram integration, persistent creator data, creator memory or historical comparison. The current response still contains edit/reshoot instructions and numeric confidence; those remain until the second roadmap PR changes the prompt, schema, UI and tests together.
 
 ## Planned PR Order
 
 ### 1. `feat/private-poc-access`
 
-Deploy the existing POC for the owner and one invited friend. Add server-enforced access and abuse controls so anonymous public use cannot consume the Gemini API. Keep the Gemini key server-side and preserve the current analysis quality and workflow.
+**Status:** Implemented; awaiting review and merge before deployment.
+
+Prepare the existing POC for Railway so the owner and one invited friend can use it. Server-enforced access prevents anonymous public use from consuming the Gemini API. The Gemini key remains server-side and the current analysis quality and workflow are unchanged.
 
 ### 2. `feat/critique-only-contract`
 

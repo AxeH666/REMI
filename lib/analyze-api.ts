@@ -3,6 +3,7 @@ import { z } from "zod";
 import { analysisResultSchema } from "./analysis-schema";
 
 export const analyzeErrorCodeSchema = z.enum([
+  "AUTHENTICATION_REQUIRED",
   "INVALID_REQUEST",
   "VIDEO_REQUIRED",
   "VIDEO_TYPE",
@@ -50,6 +51,7 @@ export type AnalyzeApiError = z.infer<typeof analyzeApiErrorSchema>;
 export type AnalyzeApiResponse = z.infer<typeof analyzeApiResponseSchema>;
 
 export const ANALYZE_ERROR_MESSAGES: Record<AnalyzeErrorCode, string> = {
+  AUTHENTICATION_REQUIRED: "Authentication is required to use REMI.",
   INVALID_REQUEST: "Submit one MP4 video and one question.",
   VIDEO_REQUIRED: "Select an MP4 video to analyse.",
   VIDEO_TYPE: "Choose an MP4 video. Other file types are not supported.",
@@ -57,8 +59,7 @@ export const ANALYZE_ERROR_MESSAGES: Record<AnalyzeErrorCode, string> = {
   VIDEO_TOO_LARGE: "The selected MP4 is larger than the configured limit.",
   PROMPT_REQUIRED: "Enter a question about your Reel.",
   PROMPT_TOO_LONG: "The question is longer than the configured limit.",
-  CONFIGURATION_ERROR:
-    "REMI is not configured for analysis. Add a valid Gemini API key and try again.",
+  CONFIGURATION_ERROR: "REMI is not configured for analysis.",
   UPLOAD_FAILED:
     "Gemini could not receive this video. Check the file and try again.",
   VIDEO_PROCESSING_FAILED:

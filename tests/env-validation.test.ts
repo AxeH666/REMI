@@ -62,7 +62,13 @@ describe("parseServerEnvironment", () => {
     });
   });
 
-  it.each([undefined, "", "   ", "replace_with_your_key"])(
+  it.each([
+    undefined,
+    "",
+    "   ",
+    "replace_with_your_key",
+    "replace_with_a_new_key",
+  ])(
     "rejects a missing, blank, or placeholder Gemini API key (%s)",
     (apiKey) => {
       expect(() =>

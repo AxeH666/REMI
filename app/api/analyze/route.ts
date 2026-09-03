@@ -1,6 +1,11 @@
 import { analyzeVideoWithGemini } from "@/lib/analyze-video";
 import { GeminiAnalysisError } from "@/lib/analyze-video";
 import {
+  getRequestAccessStatus,
+  type AccessStatus,
+} from "@/lib/access-control";
+import { createAccessFailureResponse } from "@/lib/access-response";
+import {
   ANALYZE_ERROR_MESSAGES,
   type AnalyzeApiError,
   type AnalyzeApiResponse,
@@ -13,6 +18,7 @@ import {
 } from "@/lib/analysis-schema";
 import { getServerEnvironment } from "@/lib/env";
 import type { ServerEnvironment } from "@/lib/env-validation";
+import { isSameOriginRequest } from "@/lib/request-origin";
 import {
   MP4_MIME_TYPE,
   PROMPT_VALIDATION_MESSAGES,
@@ -32,11 +38,13 @@ type RunAnalysis = (input: {
 
 type AnalyzeHandlerDependencies = {
   analyzeVideo: RunAnalysis;
+  getAccessStatus: (request: Request) => AccessStatus;
   getEnvironment: () => ServerEnvironment;
 };
 
 const defaultDependencies: AnalyzeHandlerDependencies = {
   analyzeVideo: analyzeVideoWithGemini,
+  getAccessStatus: getRequestAccessStatus,
   getEnvironment: getServerEnvironment,
 };
 
@@ -46,6 +54,11 @@ export function createPostHandler(
   const dependencies = { ...defaultDependencies, ...overrides };
 
   return async function POST(request: Request): Promise<Response> {
+    const accessStatus = dependencies.getAccessStatus(request);
+    if (accessStatus !== "authorized") {
+      return createAccessFailureResponse(accessStatus, "api");
+    }
+
     if (!isSameOriginRequest(request)) {
       return errorResponse("INVALID_REQUEST", 403);
     }
@@ -102,27 +115,6 @@ export function createPostHandler(
 }
 
 export const POST = createPostHandler();
-
-function isSameOriginRequest(request: Request): boolean {
-  if (request.headers.get("sec-fetch-site")?.toLowerCase() === "cross-site") {
-    return false;
-  }
-
-  const origin = request.headers.get("origin");
-  if (!origin) return true;
-
-  const host = request.headers.get("host");
-  if (!host) return false;
-
-  try {
-    const requestUrl = new URL(request.url);
-    const addressedOrigin = new URL(`${requestUrl.protocol}//${host}`);
-
-    return new URL(origin).origin === addressedOrigin.origin;
-  } catch {
-    return false;
-  }
-}
 
 type ValidRequestInput = {
   success: true;
