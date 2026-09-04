@@ -2,9 +2,11 @@
 
 ## Document Status
 
-This file records the original local POC implementation sequence. It is not the plan for the newly approved components. The repository contains the working Gemini integration and its reliability tests; no product implementation is part of the current documentation PR.
+This file records the original local POC implementation sequence. Milestones 0-4 produced the stable application baseline; this is not the active plan for new components.
 
 Future component order, branch names and PR boundaries are defined in `ROADMAP.md`.
+
+The immediate roadmap is the six-PR manual friction analyser: critique contract, operational perceptual-friction rubric, visual timing, audio friction, combined reporting and real-Reel evaluation. A later research-grounded knowledge phase must validate and improve the operational rubric before any Meta, old-Reel, Insights, creator-history or database work begins.
 
 ## Milestone 0 - Documentation Baseline
 
@@ -58,7 +60,9 @@ Exit condition: one real MP4 produces a validated critique.
 
 Exit condition: documented definition of done is satisfied.
 
-## Milestone 5 - Real Evaluation
+## Superseded Milestone 5 - Real Evaluation
+
+This milestone was an original plan, not evidence that evaluation was completed. Its intent now belongs to the sixth manual-analyser PR, `test/real-reel-evaluation`, after the first five focused components are merged.
 
 - Select approximately ten representative Reels.
 - Record blind human observations before running REMI.
@@ -71,6 +75,6 @@ Exit condition: a written evidence-based build/no-build decision.
 
 ## Superseded Deferred List
 
-The earlier informal deferred list has been replaced by the approved roadmap in `ROADMAP.md`. That roadmap separates private access, the critique-only contract, deterministic visual timing, audio and sensory-load analysis, Instagram connection, creator memory and two-stage historical comparison into individual planned PRs.
+The earlier informal deferred list and seven-component sequence have been replaced by the phase gates in `ROADMAP.md`. Do not use the original milestones to infer current priority.
 
-The roadmap does not approve feedback buttons, accepted-edit tracking, version comparison, a full analytics dashboard or automatic posting.
+During the manual-analyser and research-grounding phases, REMI remains a private two-user manual-upload application without Meta integration, old-Reel imports, Insights, creator history, a database or permanent storage. The roadmap also does not approve feedback buttons, accepted-edit tracking, version comparison, confidence or virality scores, a full analytics dashboard, automatic posting or unsolicited script/content criticism.

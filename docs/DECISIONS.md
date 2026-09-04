@@ -34,7 +34,8 @@ Record material product and architecture decisions here. Do not rewrite history;
 
 ## D-006 - No Persistence
 
-**Status:** Accepted  
+**Status:** Partially superseded by D-025; no database or permanent video storage remains accepted
+
 **Decision:** No database, accounts or permanent video storage in version 0.  
 **Reason:** The first experiment does not need history. Minimising storage also reduces privacy risk.
 
@@ -88,7 +89,8 @@ Record material product and architecture decisions here. Do not rewrite history;
 
 ## D-015 - Loopback and Same-Origin Local Boundary
 
-**Status:** Accepted  
+**Status:** Partially superseded by D-025 through D-027; local development remains loopback-only
+
 **Decision:** Bind the `dev` and `start` scripts to `127.0.0.1` and reject cross-origin browser submissions to the analysis route.  
 **Reason:** Version 0 has no authentication or abuse controls. These local boundaries keep the API-key-backed route from being intentionally exposed to the network or invoked by an unrelated website, without introducing an authentication system.
 
@@ -102,7 +104,7 @@ Record material product and architecture decisions here. Do not rewrite history;
 
 ## D-017 - Private Access Before Shared Use
 
-**Status:** Accepted; implementation planned in `feat/private-poc-access`
+**Status:** Accepted; implemented on `main` by PR #2 and refined by D-025
 
 **Decision:** Deploy the working POC only after access control prevents anonymous public use. Initial access is limited to the owner and one invited friend, and the Gemini API key remains server-side.
 
@@ -118,7 +120,7 @@ Record material product and architecture decisions here. Do not rewrite history;
 
 ## D-019 - Separate Audio Facts From Sensory Judgment
 
-**Status:** Accepted; implementation planned in `feat/audio-sensory-analysis`
+**Status:** Accepted technical direction; sequencing and cross-modal ownership superseded by D-028
 
 **Decision:** Gemini will judge speech/music competition, distracting effects, emotional fit and combined sensory load. FFmpeg or equivalent tooling may supply measurable loudness, peak, clipping and timing facts.
 
@@ -126,7 +128,7 @@ Record material product and architecture decisions here. Do not rewrite history;
 
 ## D-020 - Instagram Data Flows Through REMI's Backend
 
-**Status:** Accepted direction; API details require implementation research in `feat/instagram-connection`
+**Status:** Accepted future direction; gated and left unscheduled by D-030
 
 **Decision:** An eligible professional-account creator may eventually authorize REMI through Instagram's official API. REMI's backend—not Gemini—will handle authentication and retrieve that creator's own available Reels and Insights. No exact Meta permission, metric availability or review requirement is recorded as guaranteed.
 
@@ -134,7 +136,7 @@ Record material product and architecture decisions here. Do not rewrite history;
 
 ## D-021 - Creator-Isolated Memory Without Raw Video Retention
 
-**Status:** Accepted; implementation planned in `feat/creator-memory`
+**Status:** Accepted future direction; gated and left unscheduled by D-030
 
 **Decision:** Creator memory may store structured critiques, verified Instagram metrics, Reel purpose and format, posting date, duration, repeated observation tags, and model, prompt and schema versions. Raw videos are not retained permanently by default. All history is isolated per creator, with deletion and privacy controls required before broader use.
 
@@ -142,7 +144,7 @@ Record material product and architecture decisions here. Do not rewrite history;
 
 ## D-022 - Fresh Critique Precedes Historical Comparison
 
-**Status:** Accepted; implementation planned in `feat/historical-comparison`
+**Status:** Accepted future direction; gated and left unscheduled by D-030
 
 **Decision:** Analyse every new unpublished Reel first without historical performance data. Run relevant same-creator history comparison only as a separate second stage that cannot overwrite the fresh critique. Describe repeated evidence with counts, not confidence scores. Historical associations may suggest that an issue contributed to weaker performance but must never be presented as proven causation.
 
@@ -150,7 +152,7 @@ Record material product and architecture decisions here. Do not rewrite history;
 
 ## D-023 - Live Analysis Exclusions
 
-**Status:** Accepted
+**Status:** Accepted product direction; legacy confidence removal is planned in `feat/critique-only-contract`
 
 **Decision:** Do not add generic viral datasets to live analysis, Gemini fine-tuning, virality prediction, universal cross-creator benchmarks, automatic creative rewriting, permanent raw-video storage, confidence scores, a full analytics dashboard or automatic Instagram posting. Public datasets may later support offline evaluation only.
 
@@ -166,7 +168,7 @@ Record material product and architecture decisions here. Do not rewrite history;
 
 ## D-025 - Two-Account HTTP Basic Access
 
-**Status:** Accepted and implemented in `feat/private-poc-access`
+**Status:** Accepted; implemented on `main` by PR #2
 
 **Decision:** Protect the private POC with the fixed usernames `owner` and `friend`, backed by separate high-entropy passwords in server-side environment variables. Enforce the check in the application-wide Next.js proxy and repeat it inside `/api/analyze`. Do not add a database, identity provider or persistent session store.
 
@@ -174,7 +176,7 @@ Record material product and architecture decisions here. Do not rewrite history;
 
 ## D-026 - Railway Railpack Deployment Target
 
-**Status:** Accepted and implemented in `feat/private-poc-access`; deployment occurs only after merge
+**Status:** Accepted; deployment support implemented on `main` by PR #2
 
 **Decision:** Target Railway's GitHub/Railpack flow. Start the production Next.js server on `0.0.0.0` using Railway's injected `PORT`, configure the public `/api/health` readiness check in the Railway service settings after merge, and retain the existing 100 MB application upload limit and 110-second analysis timeout. Do not commit Railway's deprecated legacy Config as Code format or introduce the newer stateful Infrastructure as Code workflow for this single service. This supersedes only the production-loopback portion of D-015; local development remains bound to `127.0.0.1`.
 
@@ -182,8 +184,40 @@ Record material product and architecture decisions here. Do not rewrite history;
 
 ## D-027 - Proxy-Aware Same-Origin Validation
 
-**Status:** Accepted and implemented in `feat/private-poc-access`
+**Status:** Accepted; implemented on `main` by PR #2
 
 **Decision:** When both forwarded protocol and host are present, compare the browser `Origin` with that original public origin. Reject incomplete or invalid forwarded origin data and continue rejecting `Sec-Fetch-Site: cross-site`. Fall back to the direct request protocol and `Host` for local operation.
 
 **Reason:** Railway terminates HTTPS before forwarding to the Node.js service, so the internal request URL may not match the browser's public HTTPS origin. Using the paired forwarded values preserves CSRF protection behind the trusted production proxy without breaking local development.
+
+## D-028 - Manual Friction Analyser Is the Immediate Six-PR Phase
+
+**Status:** Accepted; implementation planned as six sequential PRs
+
+**Decision:** Keep the merged private-access application as the stable foundation and deliver the manual friction analyser in this order: `feat/critique-only-contract`, `feat/operational-friction-rubric`, `feat/visual-timing-analysis`, `feat/audio-friction-analysis`, `feat/combined-friction-reporting`, and `test/real-reel-evaluation`. PR 1 removes the currently implemented creative instructions and confidence values. PR 5, not the audio-only PR, owns combined visual/audio reporting.
+
+Throughout this phase REMI remains private to the owner and one friend, accepts manual MP4 uploads and one question, and adds no database, permanent storage, Meta integration, old-Reel import, Insights, creator memory or historical comparison. PR 1 is the entry gate for the new output boundary; after it merges, no later phase PR may reintroduce virality or confidence scores, creative solutions or unsolicited criticism of the creator's script, topic, claims or content choices.
+
+This decision supersedes the component order previously summarized from D-018 through D-022 while preserving their still-valid technical, privacy, isolation and causality boundaries.
+
+**Reason:** The smallest useful next step is to prove that REMI can identify and explain perceptual friction in finished Reels. Separating the contract, rubric, evidence pipelines, synthesis and real-Reel evaluation keeps each PR reviewable and prevents data-platform work from obscuring whether the core critic is useful.
+
+## D-029 - Operational Rubric Before Research-Grounded Knowledge
+
+**Status:** Accepted; operational rubric planned in phase 1 and evidence validation planned in phase 2
+
+**Decision:** Build a versioned operational perceptual-friction rubric as part of the manual analyser. Treat it as a practical, testable product hypothesis grounded in visible or audible Reel evidence, not as established viewer science, a universal benchmark or a score.
+
+After the complete manual analyser has been evaluated, run a separate research-grounded viewer-friction knowledge phase. Use reliable evidence with recorded provenance, applicability, conflicting findings and limitations to confirm, revise or remove rubric criteria. Do not turn general research into automatic truth about an individual creator or a live generic virality dataset.
+
+**Reason:** The manual analyser needs an explicit working rubric to become consistent, but claiming scientific authority before reviewing evidence would create false confidence. Separating operationalization from later validation allows fast product learning without overstating what is known.
+
+## D-030 - Connected Creator Data Is Gated Behind Both Earlier Phases
+
+**Status:** Accepted sequencing constraint; exact implementation order remains undecided
+
+**Decision:** Do not begin Meta API integration, creator-authorized old-Reel imports, Insights retrieval, a persistent creator-account/profile layer, databases, creator memory or historical comparison until the six manual-analyser PRs have been reviewed, merged and formally evaluated and the research-grounded knowledge phase has been reviewed and merged. No branch order for those capabilities is approved yet.
+
+If connected-data work is later approved, REMI's backend must handle Meta credentials and retrieval, creator data must remain isolated, raw videos must not be retained permanently by default, and fresh critique must precede a separate historical comparison. Historical association must never be presented as proven causation.
+
+**Reason:** Platform access and persistence add security, privacy, operational and interpretive risk. They should be justified only after the standalone manual critic and its knowledge basis have proven useful.

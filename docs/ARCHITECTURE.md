@@ -2,7 +2,7 @@
 
 ## Status Labels
 
-- **Current:** implemented in the working local POC.
+- **Current:** implemented in the stable private POC.
 - **Planned:** approved direction for a future PR; not implemented today.
 - **Research:** unresolved details that must be verified during the owning PR.
 
@@ -10,7 +10,7 @@
 
 ```text
 Windows browser
-    -> Railway HTTPS edge (production)
+    -> Railway HTTPS edge (production deployment path)
     -> Next.js private-access proxy
     -> Next.js page
     -> server-side Next.js analysis route
@@ -51,11 +51,11 @@ This design is intentionally limited to two trusted users. It adds no account da
 
 ### Current Gemini Boundary
 
-Gemini inspects the complete supplied visual and audio streams, cites approximate timestamp ranges and produces structured JSON. The current schema also includes creative instructions and numeric confidence. Those fields remain implemented until the planned critique-only contract PR changes the prompt, schema, UI and tests together.
+Gemini inspects the complete supplied visual and audio streams, cites approximate timestamp ranges and produces structured JSON. The current prompt also broadly asks about hook, clarity, progression and payoff, and the schema includes creative instructions and numeric confidence. That legacy framing remains implemented until the critique-only contract PR narrows the scope, prohibits unsolicited script/content criticism and changes the prompt, schema, UI and tests together.
 
 ### Current Storage and Access Boundary
 
-- The application is ready for private remote deployment but is not deployed by this PR.
+- Private access and Railway production support are implemented on `main`; live deployment health remains external operational state rather than an architecture claim.
 - Development binds to `127.0.0.1`; production binds to `0.0.0.0` and uses the platform-assigned `PORT`.
 - There is no database or permanent application video storage.
 - The multipart `File` is uploaded directly as a `Blob`; REMI does not create a local temporary video copy.
@@ -94,69 +94,60 @@ Railway currently requires request bodies to finish within five minutes and clos
 
 The deployment target is Railway Hobby or higher, not the Free plan's current 0.5 GB memory ceiling. The route materializes multipart input in the Node.js process before the Gemini upload, so peak memory must be measured with a representative near-limit video after deployment before applying a service resource cap.
 
-## Approved Future Architecture
+## Planned Architecture Sequence
 
-Every component below is planned and belongs to its own future PR. The implementation order is defined in `ROADMAP.md`.
+The implementation order is defined in `ROADMAP.md`. Planned components below are not present in the current runtime.
 
 ```text
-Owner or invited creator
-    -> planned private access control
-    -> Next.js REMI backend
-         -> current Gemini full-video analysis
-         -> planned deterministic visual/audio facts
-         -> planned Instagram API integration
-         -> planned creator-isolated metadata and critique store
-    -> planned critique-only result
-         -> fresh critique first
-         -> separate relevant-history comparison second
+Current private manual upload
+    -> current Gemini full-video analysis
+
+Phase 1: manual friction analyser
+    -> critique-only response contract
+    -> operational perceptual-friction rubric
+    -> native Gemini review
+       + deterministic visual-timing evidence
+       + deterministic audio-friction evidence
+    -> combined, deduplicated timestamped critique
+    -> real-Reel evaluation gate
+
+Phase 2: research-grounded viewer-friction knowledge
+    -> reliable evidence with provenance and limitations
+    -> validate, revise or remove operational rubric criteria
+
+Phase 3: connected creator data, only if later approved
+    -> Meta authorization and old-Reel/Insights retrieval
+    -> creator-isolated persistent records
+    -> separate historical comparison after fresh critique
 ```
 
-### Implemented Private POC Access
+### Phase 1 - Manual Friction Analyser
 
-The private-access component is implemented in `feat/private-poc-access` and becomes the stable baseline when merged. Deployment itself remains a post-merge owner action. High-entropy credentials prevent anonymous public consumption of the API-backed route, and `GEMINI_API_KEY` remains server-side.
+All six manual-analyser PRs retain the current private two-user access and manual one-MP4-plus-one-question boundary. They add no database, permanent storage, Meta access, old-Reel import, Insights or creator history.
 
-### Planned Critique-Only Contract
+The critique-only contract removes the current solution and confidence fields. The operational rubric then provides a versioned working framework for relating visible or audible execution evidence to likely viewer friction. It is not a scientific claim, universal benchmark or scoring model, and it must not invite unsolicited criticism of the creator's script, topic, claims or content choices.
 
-The response will describe the observed moment, what feels wrong, the likely viewer effect and supporting visible or audible evidence. It will contain no creative solutions, scores or forced findings. The planned contract is defined in `AI_ANALYSIS_CONTRACT.md`.
+The visual-timing pipeline may use FFmpeg or an equivalent deterministic tool to detect changes, measure display intervals and extract relevant frames. It must preserve the complete-video Gemini input, select no fixed sampling rate before representative testing, and keep all source and derived media temporary.
 
-### Planned Visual Timing and Layout Pipeline
+The audio-friction pipeline may provide measurable loudness, peak, clipping and timing facts. Gemini remains responsible for qualitative audio judgment. The audio PR does not own cross-modal conclusions.
 
-Gemini's normal video inspection may miss sub-second visuals. FFmpeg or an equivalent deterministic tool will be evaluated for detecting visual changes, measuring exact display intervals and extracting only relevant frames and timing facts.
+Combined reporting aligns the native review, rubric, visual evidence and audio evidence by time, preserves their provenance and limitations, merges overlapping observations and assesses combined visual/audio load. It must return one coherent critique without scores, confidence percentages or duplicated findings.
 
-The evidence should help Gemini inspect inserted images, screenshots, text cards, captions, cropping, small or unreadable text, clutter, rapid cuts, sub-second images, overlong images and whether a viewer has enough time to understand an image. The full Reel will still be supplied to Gemini so preprocessing does not reduce its existing contextual analysis.
+Real-Reel evaluation uses manual uploads and external evaluation notes. It does not require application storage or add a runtime service.
 
-No exact frame rate or sampling strategy is approved until representative Reels have been tested.
+### Phase 2 - Research-Grounded Viewer-Friction Knowledge
 
-### Planned Audio and Sensory-Load Pipeline
+Only after real-Reel evaluation of the integrated manual analyser is completed and reviewed may a separate research phase validate and improve the operational rubric using reliable evidence. Sources, provenance, applicability, conflicting findings and limitations must remain reviewable. A criterion may be retained, changed or removed based on that evidence.
 
-Gemini will continue to provide the human-like judgment about music, speech, sound effects, emotional fit and combined sensory load. FFmpeg or another deterministic tool may provide measurable loudness, peak, clipping and timing facts. Deterministic measurements and model interpretations must remain distinguishable.
+This phase does not create a live generic-content corpus, universal viewer model, confidence score or virality predictor. Its runtime architecture and PR breakdown are not yet approved.
 
-### Planned Instagram Boundary
+### Phase 3 - Connected Creator Data
 
-REMI's backend—not Gemini—will manage Instagram authorization, token handling and retrieval of the signed-in creator's own Reels and available Insights through Instagram's official API.
+Meta integration and persistence are gated until both earlier phases are complete. If later approved, REMI's backend—not Gemini—will manage Meta authorization, token handling and retrieval of the authorized creator's own old Reels and available Insights. Exact permissions, account eligibility, metrics, token lifecycle and review requirements remain implementation research.
 
-Exact Meta permission names, professional-account eligibility, accessible metrics, token lifecycle and review requirements are **research**, not finalized API guarantees. They must be verified against current official Meta documentation during `feat/instagram-connection`.
+A later persistent store would require strict creator isolation, deletion controls and versioned records. Raw Reel videos would not be retained permanently by default. The invited friend's mental-health data must never be queried with the owner's MMA, engineering or startup data.
 
-### Planned Creator Memory
-
-A persistent store may contain:
-
-- structured Reel critiques;
-- verified Instagram performance metrics;
-- Reel purpose, format, posting date and duration;
-- repeated observation tags; and
-- model, prompt and schema versions.
-
-All records must be scoped to one creator identity. The invited friend's mental-health history must never be queried or compared with the owner's MMA, engineering or startup history. Raw Reel videos will not be retained permanently by default. Deletion and privacy controls are required before broader product access.
-
-### Planned Two-Stage Historical Comparison
-
-New unpublished Reels will be processed in two distinct stages:
-
-1. A fresh critique receives the Reel and prompt without historical performance data.
-2. A separate comparison receives that completed critique plus only relevant Reels from the same creator's history.
-
-Historical context may add evidence but cannot overwrite or bias the fresh critique. Results should use counts, such as `Observed in 4 of 6 comparable Reels.`, rather than confidence scores. REMI may report that a pattern appeared repeatedly in weaker-performing Reels or may have contributed to performance, but it must never claim proven causation because distribution and other external factors also influence reach.
+Any historical comparison would remain a second stage after an unchanged fresh critique. It could report observed counts and cautious association, but never confidence scores or proven causation. The exact connected-data PR order is not yet approved.
 
 ## Failure and Trust Boundaries
 
@@ -167,10 +158,10 @@ Historical context may add evidence but cannot overwrite or bias the fresh criti
 - The current SDK cannot cancel an in-flight Files API byte upload. If a timed-out upload later returns a provider file name, REMI schedules bounded best-effort deletion.
 - Remote deletion has its own shorter timeout and never replaces the primary result or error.
 - The browser rejects malformed or status-inconsistent API envelopes.
-- Model output, preprocessing output and external API data are untrusted inputs.
-- Verified Instagram metrics must remain distinguishable from model interpretation.
-- Historical comparison must not cross creator boundaries.
+- Model output, preprocessing output, research evidence and future external API data are untrusted inputs.
+- Future verified Meta metrics must remain distinguishable from model interpretation.
+- Any future historical comparison must not cross creator boundaries.
 
 ## Intentionally Excluded
 
-The approved architecture does not include generic viral datasets in live analysis, Gemini fine-tuning, virality prediction, universal cross-creator benchmarks, automatic creative rewriting, permanent raw-video storage, confidence scores, a full analytics dashboard or automatic Instagram posting. Public datasets may later be used only for offline evaluation.
+The approved architecture does not include generic viral datasets in live analysis, Gemini fine-tuning, virality prediction, universal cross-creator benchmarks, unsolicited script/content criticism, automatic creative rewriting, permanent raw-video storage, confidence scores, a full analytics dashboard or automatic Instagram posting. Reliable public evidence may later inform the research phase, but it is not automatically an input to personal critique.

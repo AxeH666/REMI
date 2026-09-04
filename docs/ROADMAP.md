@@ -2,47 +2,55 @@
 
 ## Status
 
-This roadmap records the ordered REMI components. Private POC access is implemented by `feat/private-poc-access` and becomes part of the stable baseline when that PR is merged. Later components remain planned and are not implemented.
+This file is the authoritative order for future REMI work. `main` is the stable baseline. Each named component must be developed as one logical PR with its tests and documentation, and the next component must not begin until the current PR is reviewed and merged.
 
-`main` is the stable baseline. Each component below must be developed on its named branch as one logical PR, with its tests and documentation included. Do not begin the next component until the current PR has been reviewed and merged. A deployed stable POC may remain usable while a planned component is developed separately.
+Private POC access is already merged. The stable application is limited to the owner and one friend and uses a manually uploaded MP4 plus one user question. It sends the complete Reel to Gemini, validates a structured response and does not permanently store the upload, prompt or result. It has no database, Meta integration, old-Reel import, Insights, creator history or historical comparison.
 
-## Current Baseline to Preserve
+The current response still contains legacy edit/reshoot instructions and numeric confidence, and its prompt broadly asks about hook, clarity, progression and payoff. That is implemented behavior, not the approved manual-analyser contract. The first PR below removes the solution/score fields and enforces the no-unsolicited-script/content boundary before the remaining phase work proceeds.
 
-Today REMI accepts one completed MP4 and one question, sends the full video to Gemini for native video-and-audio analysis, validates a structured timestamped critique and does not permanently store the uploaded video. The private-access PR adds deployment readiness and two-user access without changing that analysis behavior.
+## Phase 1 - Manual Friction Analyser
 
-Deployment remains an explicit post-merge owner action. REMI still has no Instagram integration, persistent creator data, creator memory or historical comparison. The current response still contains edit/reshoot instructions and numeric confidence; those remain until the second roadmap PR changes the prompt, schema, UI and tests together.
+This is the immediate product phase. Throughout it, REMI remains a private two-user application based on manual MP4 uploads. It does not add a database, permanent storage, Meta access, old-Reel imports, Insights, creator memory, historical comparison, virality prediction or a general analytics product.
 
-## Planned PR Order
+Once PR 1 is merged, every later PR in this phase must preserve the critique-only boundary: no creative fixes, confidence scores, forced findings or unsolicited criticism of the creator's script, topic, claims or content choices. REMI may refer to spoken or on-screen content only when it is necessary evidence for the perceptual friction being reported or the user directly asks about it.
 
-### 1. `feat/private-poc-access`
+### 1. `feat/critique-only-contract`
 
-**Status:** Implemented; awaiting review and merge before deployment.
+Replace the legacy creative-direction response with evidence-based criticism. Each finding contains an observed moment, what feels wrong, the likely viewer effect and supporting visible or audible evidence. Allow zero findings. Remove edit/reshoot instructions, solution fields, confidence values, scores and forced criticism from the prompt, schema, interface and tests. Prohibit unsolicited script or content criticism.
 
-Prepare the existing POC for Railway so the owner and one invited friend can use it. Server-enforced access prevents anonymous public use from consuming the Gemini API. The Gemini key remains server-side and the current analysis quality and workflow are unchanged.
+### 2. `feat/operational-friction-rubric`
 
-### 2. `feat/critique-only-contract`
+Define a versioned operational perceptual-friction rubric for the manual analyser. It should turn observable delivery, pacing, framing, expression, voice, editing, visual-layout and audio cues into consistent questions about viewer comprehension, attention, trust and emotional reception.
 
-Change REMI from creative-direction output to evidence-based criticism. Each finding contains an observed moment, what feels wrong, likely viewer effect and supporting visible or audible evidence. Allow zero findings. Remove creative solutions, edit/reshoot instructions, scores, confidence values and forced criticism from prompt, schema, UI and tests.
+This rubric is a practical, testable working framework, not established science, a universal benchmark or a score. It must stay grounded in evidence from the uploaded Reel and inside the critique-only contract.
 
 ### 3. `feat/visual-timing-analysis`
 
-Add deterministic visual-change and duration evidence using FFmpeg or an equivalent tool while preserving Gemini's full-video input. Cover inserted images, screenshots, cards, captions, crops, unreadable text, clutter, rapid cuts, sub-second visuals, overlong holds and comprehension time. Select a frame or sampling strategy only after testing.
+Add deterministic visual-change and duration evidence using FFmpeg or an equivalent tool while preserving Gemini's complete-video input. Cover inserted images, screenshots, text cards, captions, crops, unreadable text, clutter, rapid cuts, sub-second visuals, overlong holds and comprehension time. Select a frame or sampling strategy only after representative testing. Keep derived frames temporary.
 
-### 4. `feat/audio-sensory-analysis`
+### 4. `feat/audio-friction-analysis`
 
-Add measurable loudness, peak, clipping and timing facts where useful. Keep Gemini responsible for judging speech/music competition, distracting effects, sudden changes, emotional mismatch and combined visual/audio overload.
+Add measurable audio facts such as loudness, peaks, clipping and timing where useful. Keep Gemini responsible for judging speech/music competition, distracting effects, sudden changes and emotional mismatch. This PR owns audio friction only; cross-modal synthesis belongs to the next PR.
 
-### 5. `feat/instagram-connection`
+### 5. `feat/combined-friction-reporting`
 
-Allow eligible professional-account creators to authorize REMI through Instagram's official API. REMI's backend handles credentials and retrieves only the authorized creator's own available Reels and Insights. Verify exact Meta permissions, account eligibility, metric availability and review requirements during implementation; none is guaranteed here.
+Combine the native Gemini review, operational rubric, deterministic visual evidence and audio-friction evidence into one coherent timestamped critique. Preserve the source and limits of each kind of evidence, reconcile overlapping findings and avoid double-counting one moment. Combined visual/audio overload is assessed here. Do not introduce an overall score or confidence percentage.
 
-### 6. `feat/creator-memory`
+### 6. `test/real-reel-evaluation`
 
-Store creator-scoped structured critiques, verified metrics, Reel purpose and format, dates, durations, observation tags, and model/prompt/schema versions. Do not permanently retain raw Reel videos by default. Enforce cross-creator isolation and provide deletion and privacy controls before broader use.
+Evaluate the integrated manual analyser with representative, manually uploaded Reels from the two private users. Compare results with blind human observations and record timestamp accuracy, evidence quality, usefulness, forced criticism, hallucinations, domain-safety failures and repeat-run consistency. This PR validates the product; it does not add persistence, platform data or new product scope.
 
-### 7. `feat/historical-comparison`
+## Phase 2 - Research-Grounded Viewer-Friction Knowledge
 
-Keep fresh critique and history comparison separate. First analyse the unpublished Reel without performance history; then compare the unchanged critique with only relevant Reels from the same creator. Use observed counts instead of confidence scores and describe associations without claiming that history proves causation.
+This phase begins only after the six manual-analyser PRs are reviewed, merged and evaluated. It will test and improve the operational rubric using reliable evidence, with source provenance, applicability and limitations recorded. Research may confirm, revise or remove rubric criteria; it must not present the phase-1 working framework as already scientifically validated.
+
+This is a knowledge-validation phase, not a live generic-content dataset, virality model or universal scoring system. Its exact PR breakdown will be decided after the real-Reel evaluation.
+
+## Phase 3 - Connected Creator Data
+
+Meta API integration, creator-authorized old-Reel imports, available Insights, a persistent creator-account/profile layer, databases, creator history and historical comparison are gated until both the manual-analyser and research-grounded knowledge phases are complete. They are not approved as immediate implementation work, and their exact PR order remains undecided.
+
+If this phase is approved later, the existing requirements still apply: REMI's backend handles Meta credentials and retrieval, creators remain isolated, raw Reel videos are not permanently retained by default, and fresh critique remains separate from historical comparison. Historical associations must never be presented as proven causation.
 
 ## Deferred or Rejected
 
@@ -52,10 +60,11 @@ The roadmap does not approve:
 - Gemini fine-tuning;
 - virality prediction;
 - universal benchmarks across unrelated creators;
+- unsolicited script, topic, claim or content criticism;
 - automatic script, hook, edit or reshoot direction;
 - permanent raw-video storage;
 - confidence scores or percentages;
 - a full analytics dashboard; or
 - automatic Instagram posting.
 
-Public datasets may later be considered for offline evaluation, not as the source of truth for personal critique.
+Reliable public evidence may support the phase-2 research process, but it is not the source of truth for a creator's personal critique and is not automatically an input to live analysis.

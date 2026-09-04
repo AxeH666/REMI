@@ -4,7 +4,7 @@ REMI processes unpublished creator videos. Treat every uploaded video as private
 
 ## Secrets
 
-- Store the Gemini key only in `.env.local`.
+- Store the Gemini key only in `.env.local` during local development and in server-side platform variables for deployment.
 - Treat the previously used Gemini key as compromised. Revoke it and create a new key for deployment.
 - Never use a variable beginning with `NEXT_PUBLIC_` for the key.
 - Keep `REMI_OWNER_PASSWORD` and `REMI_FRIEND_PASSWORD` server-side and give them different, randomly generated values.
@@ -37,11 +37,11 @@ The model is evaluating presentation quality, not providing medical care.
 - Do not diagnose the speaker or audience.
 - Do not assess whether medical claims are clinically correct unless a future feature adds evidence retrieval and review.
 - Do not recommend manipulation, shame, fear or overclaiming to increase engagement.
-- The UI should state that REMI provides creative feedback, not medical or platform-performance guarantees.
+- The UI should state that REMI provides perceptual-friction critique, not medical or platform-performance guarantees.
 
-## Before Deploying the App
+## Deployment Baseline
 
-Do not deploy an unmerged branch. After the private-access PR is reviewed and merged, configure a new Gemini key and both access passwords before making the Railway service public.
+Do not deploy an unmerged branch. Private access is merged into `main`; every deployment must use an uncompromised Gemini key and configure both access passwords before exposing a Railway domain. Never reuse the previously compromised key.
 
 The development script binds to `127.0.0.1`. The production script binds to `0.0.0.0` so Railway can reach its assigned `PORT`; private access must therefore remain configured and enabled in every deployed environment.
 
@@ -60,6 +60,18 @@ The private deployment is limited to the owner and one invited friend.
 
 High-entropy credentials are the abuse control for this two-person trusted-user POC. This is not a general-purpose account system: it has no password recovery, persistent sessions, audit history or distributed rate limiter. Rotate a credential and redeploy immediately if it is exposed. Browsers may cache Basic credentials, so shared-device users must close the private session or clear site credentials.
 
+## Manual-Analyser and Research-Phase Boundary
+
+Throughout the six manual-analyser PRs and the later research-grounding phase:
+
+- access remains limited to the owner and one friend;
+- inputs remain manually uploaded MP4 files and user questions;
+- no database, permanent application storage, Meta authorization, old-Reel import, Insights, persistent creator-account/profile layer or creator history is introduced;
+- prompts and critiques are not permanently retained by the application; and
+- any temporary frames, audio segments or other derived artifacts introduced by visual/audio analysis must be uniquely scoped and deleted after success, failure and timeout.
+
+Research sources must be handled as general evidence with provenance and limitations. Research corpora and source materials must not be ingested or joined with private creator media. Keep research-derived rubric knowledge distinct from observations about a creator's Reel, and never treat it as automatic truth about that creator.
+
 ## Railway Transport Boundary
 
 - Railway terminates public TLS and supplies the original HTTPS protocol and host through forwarded headers.
@@ -68,9 +80,9 @@ High-entropy credentials are the abuse control for this two-person trusted-user 
 - The upload must complete within Railway's five-minute request-body window. REMI's current analysis timeout remains below Railway's five-minute inactive-request limit.
 - `/api/health` confirms configuration presence only; it does not validate credentials against Gemini or make a provider request.
 
-## Planned Instagram Security
+## Post-Research Meta Security
 
-Instagram integration is planned, not implemented.
+Meta integration is not part of the manual-analyser or research-grounding phase. The requirements below apply only if a connected-data phase is separately approved afterward.
 
 - REMI's backend must perform authorization, token exchange, token refresh or renewal, and API retrieval. Gemini must never receive Instagram credentials.
 - Tokens must be encrypted at rest, excluded from client responses and logs, and scoped to the creator who authorized them.
@@ -78,9 +90,9 @@ Instagram integration is planned, not implemented.
 - Revocation, expiry and authorization removal must stop subsequent access cleanly.
 - Exact Meta permissions, eligible account requirements, token lifecycle and app-review requirements must be verified from current official Meta documentation during the implementation PR. This document does not assert permission names or API guarantees.
 
-## Planned Creator Data Isolation
+## Post-Research Creator Data Isolation
 
-Creator memory and historical comparison are planned, not implemented.
+Creator memory, databases and historical comparison are not immediate planned work. The requirements below apply only after both earlier phases and a separate implementation decision.
 
 - Every stored Reel record, critique, metric and observation tag must belong to one authenticated creator identity.
 - Authorization must be applied to every read, write, comparison and deletion operation.
@@ -89,7 +101,7 @@ Creator memory and historical comparison are planned, not implemented.
 - Model, prompt and schema versions must be retained with each stored critique so later comparisons remain auditable.
 - Cross-creator isolation requires automated tests before creator memory is used.
 
-## Planned Retention and Deletion
+## Post-Research Retention and Deletion
 
 - Do not permanently retain raw Reel videos by default.
 - Store only the creator-specific structured data needed for critique history and relevant comparison.
