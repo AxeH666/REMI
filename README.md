@@ -2,7 +2,7 @@
 
 **Reel Evaluation & Moment Inspector**
 
-REMI is a local proof of concept for inspecting a completed short-form Reel. A user submits one MP4 and one natural-language question; Gemini inspects the video's visual and audio streams and REMI returns a validated, timestamped critique.
+REMI is a private two-user proof of concept for inspecting a completed short-form Reel. The owner or one invited friend manually submits one MP4 and one natural-language question; Gemini inspects the video's visual and audio streams and REMI returns a validated, timestamped critique.
 
 ## Current Status
 
@@ -13,18 +13,18 @@ The working baseline currently:
 - uses Gemini's native video-and-audio analysis;
 - validates structured output with Zod before rendering it;
 - shows timestamped observations, a verdict, strengths and limitations;
-- is ready for private Railway deployment with separate owner and friend credentials; and
+- supports private Railway access with separate owner and friend credentials; and
 - does not permanently store uploaded videos.
 
-The current response schema still includes edit or reshoot instructions and numeric confidence. Those fields are part of the implemented baseline, not the finalized product direction. The planned `feat/critique-only-contract` PR will remove them while preserving the quality of the working Gemini analysis.
+The current response schema still includes legacy edit or reshoot instructions and numeric confidence, and its prompt broadly asks about hook, clarity, progression and payoff. Those are parts of today's implemented behavior, not the approved manual-analyser contract. The first planned PR, `feat/critique-only-contract`, will remove the solution/score fields and enforce the no-unsolicited-script/content boundary while preserving the quality of the working Gemini analysis.
 
-REMI is not deployed by this repository change. It does not have Instagram integration, persistent storage, creator memory or historical comparison. Later planned components are described in the [roadmap](docs/ROADMAP.md); they are not implemented.
+Private access is merged into `main`. Deployment health is external operational state and is not asserted by this document. REMI has no Meta integration, old-Reel import, Insights, database, persistent storage, creator memory or historical comparison.
 
 ## Product Direction
 
 REMI is a Reel critic, not a creative director. Its job is to identify an exact moment, describe the observable problem, explain the likely viewer effect and cite visible or audible evidence. It may report that no meaningful problem was found.
 
-REMI will not rewrite scripts, invent hooks, direct the creator's personal expression, prescribe edits or reshoots, produce viral or confidence scores, force criticism or claim that one issue definitely caused poor performance.
+REMI will not rewrite scripts, invent hooks, direct the creator's personal expression, prescribe edits or reshoots, produce viral or confidence scores, force criticism, volunteer criticism of the creator's script or content choices, or claim that one issue definitely caused poor performance.
 
 ## Current Workflow
 
@@ -34,6 +34,12 @@ Upload one MP4 + enter one question
     -> Zod-validated structured critique
     -> safe rendered result
 ```
+
+## Roadmap
+
+The immediate manual-friction-analyser phase is split into six sequential PRs: critique-only contract, operational perceptual-friction rubric, visual timing, audio friction, combined reporting and real-Reel evaluation. Throughout those PRs, REMI stays private to two users and keeps manual MP4 uploads with no database, permanent storage or Meta data.
+
+The operational rubric is a working product framework, not established viewer science. Only after the manual analyser is complete will a separate research-grounded viewer-friction knowledge phase validate and improve it using reliable evidence. Meta authorization, old-Reel imports, Insights, creator history and databases are gated until both phases are complete. See the [roadmap](docs/ROADMAP.md) for the authoritative order.
 
 ## Stack
 
@@ -106,7 +112,7 @@ The selected file stays in the browser until submission. On submit, the server s
 
 Railway is the supported private-POC target. Its current public edge supplies HTTPS and the forwarded host/protocol headers used by REMI's same-origin check. Its five-minute upload and idle-request windows exceed REMI's current 110-second analysis timeout. See Railway's official [public-networking limits](https://docs.railway.com/networking/public-networking/specs-and-limits), [Next.js deployment guide](https://docs.railway.com/guides/nextjs), [healthcheck documentation](https://docs.railway.com/deployments/healthchecks) and [plan resource limits](https://docs.railway.com/pricing/plans).
 
-After this feature PR is reviewed and merged:
+For a new or rebuilt Railway service using the merged private-access baseline:
 
 1. Create a Railway Hobby project (or higher) from the GitHub repository, select `main` and use Railpack. Do not generate a public domain yet.
 2. Add a newly created Gemini key and the two unique access passwords as Railway service variables. Do not reuse the previous Gemini key.

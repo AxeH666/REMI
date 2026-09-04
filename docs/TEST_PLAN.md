@@ -18,6 +18,7 @@ This document separates tests for the current working POC from acceptance criter
 - Accept a complete valid response and fewer than three problems.
 - Reject more than three problems, invalid timestamp ordering, malformed JSON and incomplete results.
 - Validate the currently implemented `fixType`, `instruction` and numeric `confidence` fields.
+- Treat the current prompt's broad hook, clarity, progression and payoff framing as legacy behavior, not proof that the planned no-unsolicited-script/content boundary is implemented.
 
 These three fields remain part of the software baseline only. Their tests must be replaced, not silently removed, when `feat/critique-only-contract` changes the prompt, schema and UI.
 
@@ -47,7 +48,9 @@ All normal automated tests replace the Gemini boundary with a fake or mock and m
 - Reject a mismatched origin before parsing the upload or calling Gemini.
 - Start the production server on an assigned port and confirm the health and authentication boundaries without making a real Gemini request.
 
-## Current Creative Evaluation Method
+## Planned Real-Reel Evaluation Protocol
+
+The sixth manual-analyser PR, `test/real-reel-evaluation`, will execute this protocol. No completed evaluation results are claimed by the current documentation.
 
 Use approximately ten Reels covering varied execution and subject matter:
 
@@ -76,37 +79,80 @@ Evaluate:
 
 Track timestamp accuracy, evidence quality, useful-explanation rate, forced-criticism rate, hallucination rate, domain-safety failures, median analysis time and provider failure rate. These are learning measures, not performance or marketing claims.
 
+All inputs remain manual MP4 uploads from the two private users. The evaluation does not ingest Meta data, old Reels through an API, Insights or creator history, and it adds no persistent application storage for inputs or results.
+
 ## Planned Acceptance Criteria
 
-All sections below are **planned**. Each belongs to its named future PR and must be refined into automated and manual tests in that PR.
+All sections below are **planned**. Each owning PR must refine and satisfy its criteria without implementing a later roadmap component. Current private-access coverage is recorded under Current Automated Tests above; live deployment health and credential checks are operational evidence, not inferred from this document.
 
-### Implemented: `feat/private-poc-access`
-
-- Focused automated coverage now verifies the private-access criteria above. A post-merge deployment check must still confirm both accounts against the Railway HTTPS domain and verify that an unauthenticated analysis request returns `401` without contacting Gemini.
-
-### Planned: `feat/critique-only-contract`
+### Phase 1.1: `feat/critique-only-contract`
 
 - Every finding contains an observed moment, what feels wrong, likely viewer effect and supporting visible or audible evidence.
 - Zero findings is valid and renders clearly.
 - No prompt, model response, application schema or UI element requires or displays a creative solution, edit instruction, reshoot instruction, confidence score or confidence percentage.
-- Script rewrites, invented hooks, generic advice and unsupported causal claims are rejected in evaluation.
+- Script rewrites, invented hooks, unsolicited script/content criticism, generic advice and unsupported causal claims are rejected in evaluation.
 - Full-video inspection, timestamp usefulness, evidence quality and mental-health safeguards are preserved.
 
-### Planned: `feat/visual-timing-analysis`
+### Phase 1.2: `feat/operational-friction-rubric`
+
+- The rubric is versioned and maps observable or audible evidence to clearly bounded perceptual-friction questions.
+- It covers delivery, pacing, framing, expression, voice, editing, visual layout and audio without treating every category as a required finding.
+- It distinguishes observation from likely viewer effect and qualitative prioritisation from measurement.
+- It produces no confidence, virality or universal-quality score.
+- It does not volunteer criticism of a creator's script, topic, claims or content choices.
+- Documentation labels the rubric as an operational product hypothesis, not research-validated viewer science.
+- Fixtures include effective Reels where the correct result has zero findings.
+
+### Phase 1.3: `feat/visual-timing-analysis`
 
 - Representative tests cover inserted images, screenshots, text cards, captions, cropping, unreadable text, clutter, rapid cuts, sub-second visuals and unnecessarily long holds.
 - Deterministic timing agrees with fixture ground truth within a tolerance selected during implementation.
 - Relevant frames and timing facts reach Gemini without replacing the complete-video input.
 - The chosen sampling or change-detection strategy is based on test evidence; no frame rate is assumed in advance.
 - Evaluation checks whether REMI can judge whether viewers have enough time to understand an image.
+- Source and derived visual media are temporary and cleaned up after success, failure and timeout.
 
-### Planned: `feat/audio-sensory-analysis`
+### Phase 1.4: `feat/audio-friction-analysis`
 
-- Fixtures cover speech/music competition, distracting effects, sudden volume changes, clipping, excessive loudness, emotional mismatch and combined visual/audio overload.
+- Fixtures cover speech/music competition, distracting effects, sudden volume changes, clipping, excessive loudness and emotional mismatch.
 - Deterministic loudness, peak and timing facts are tested independently from Gemini's qualitative judgment.
 - The result does not present model interpretation as a measured audio fact.
+- Temporary audio artifacts are cleaned up after success, failure and timeout.
+- Cross-modal visual/audio conclusions are left to combined reporting.
 
-### Planned: `feat/instagram-connection`
+### Phase 1.5: `feat/combined-friction-reporting`
+
+- Native Gemini observations, rubric findings, visual facts and audio facts retain identifiable provenance and limitations.
+- Evidence is aligned by timestamp and overlapping reports of the same moment are reconciled rather than duplicated.
+- Combined visual/audio overload is assessed without converting separate measurements into an unsupported causal claim.
+- The final response remains inside the critique-only contract and contains no aggregate score or confidence percentage.
+- One missing or inconclusive evidence source does not create a fabricated finding.
+
+### Phase 1.6: `test/real-reel-evaluation`
+
+- The planned protocol above is run on representative manual uploads, including effective Reels and both users' different subject areas.
+- Blind human observations are recorded before REMI output is reviewed.
+- Runs record the model, prompt, schema and rubric versions outside the application without adding a product database.
+- Results measure evidence quality, timestamp usefulness, restraint, hallucinations, domain safety and repeat-run consistency.
+- The evaluation records failures and trade-offs and ends with an evidence-based continue, revise, repeat or stop decision.
+- No Meta data, performance Insights, creator history, confidence score or virality claim enters the evaluation.
+
+## Planned Phase 2 Acceptance Criteria
+
+The research-grounded viewer-friction knowledge phase starts only after all six manual-analyser PRs are reviewed, merged and formally evaluated.
+
+- Include only reliable evidence under documented source-selection rules.
+- Record source provenance, study context, population, applicability, limitations and conflicting evidence.
+- Trace every proposed rubric change to supporting evidence and a versioned evaluation result.
+- Allow evidence to confirm, revise or remove an operational rubric criterion.
+- Keep research-derived general knowledge distinct from observations about the uploaded Reel.
+- Do not turn public evidence into a live generic-content corpus, universal benchmark, confidence score or virality predictor.
+
+## Post-Research Future Gates
+
+The criteria below preserve requirements for a possible connected-data phase. Meta integration, old-Reel imports, Insights, creator history and databases are not immediate planned components and receive no branch order until both earlier phases are complete.
+
+### Future Meta Connection
 
 - Tests use only permissions, account types, metrics and token behavior verified from current official Meta documentation during implementation.
 - OAuth state and token handling resist cross-user access and accidental disclosure.
@@ -114,7 +160,7 @@ All sections below are **planned**. Each belongs to its named future PR and must
 - Gemini never receives Instagram credentials or retrieves Instagram data directly.
 - Revocation, expired tokens, missing permissions and partial metric availability fail safely.
 
-### Planned: `feat/creator-memory`
+### Future Creator Data and Database
 
 - Stored records include creator scope plus model, prompt and schema versions.
 - Structured critique, verified metrics, Reel purpose and format, posting date, duration and observation tags remain attributable to the correct Reel and creator.
@@ -123,7 +169,7 @@ All sections below are **planned**. Each belongs to its named future PR and must
 - Raw Reel videos are not retained permanently by default.
 - Deletion and privacy controls work before access expands beyond the private POC.
 
-### Planned: `feat/historical-comparison`
+### Future Historical Comparison
 
 - The fresh critique runs without historical performance data and is stored or passed forward unchanged.
 - The second stage uses only relevant previous Reels from the same creator.
@@ -135,4 +181,4 @@ All sections below are **planned**. Each belongs to its named future PR and must
 
 ## Evaluation Guardrail
 
-Public datasets may later support offline evaluation, but they are not the source of truth for a creator's personal critique and are not inputs to live analysis under the approved roadmap.
+Reliable public evidence may later support the research phase, but it is not the source of truth for a creator's personal critique and is not automatically an input to live analysis under the approved roadmap.

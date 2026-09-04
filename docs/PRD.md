@@ -4,7 +4,7 @@
 
 **Name:** REMI  
 **Expansion:** Reel Evaluation & Moment Inspector  
-**Current stage:** Private POC access implemented and awaiting review, merge and owner deployment.
+**Current stage:** Private two-user POC; manual friction analyser phase planned.
 
 **Initial users:** The owner and one invited mental-health creator
 
@@ -16,17 +16,17 @@ REMI is a Reel critic, not a creative director. It protects the creator's owners
 
 ## Current Working Baseline
 
-The implemented local POC currently:
+The implemented private POC currently:
 
 - accepts one completed MP4 Reel and one user question;
 - sends the complete video to Gemini for native visual and audio analysis;
 - returns a structured, timestamped critique validated by the application;
 - keeps the Gemini API key server-side;
-- is ready for private Railway deployment with separate owner and friend credentials;
+- supports private Railway access with separate owner and friend credentials;
 - has no Instagram integration, persistent storage, creator memory or historical comparison; and
 - does not permanently store uploaded videos.
 
-The current application schema includes edit or reshoot instructions and numeric confidence. That behavior remains implemented until the planned critique-only contract PR changes the prompt, schema, UI and tests together. Planned behavior below must not be read as already implemented.
+The current application schema includes edit or reshoot instructions and numeric confidence, and its prompt broadly asks about hook, clarity, progression and payoff. Those legacy choices conflict with the approved manual-analyser boundary and remain implemented only until the first planned PR changes the prompt, schema, UI and tests together. Planned behavior below must not be read as already implemented.
 
 ## Finalized Product Role
 
@@ -42,6 +42,7 @@ REMI should inspect delivery, pacing, framing, facial expression, voice, editing
 REMI should not:
 
 - rewrite scripts or invent hooks;
+- volunteer criticism of the script, topic, claims or content choices when the user asked about perceptual execution;
 - provide creative edit or reshoot instructions;
 - tell the creator how to express their personal creativity;
 - produce viral scores;
@@ -55,7 +56,7 @@ REMI should not:
 
 ## Current Workflow
 
-1. The user opens the local application.
+1. The owner or invited friend opens the private application.
 2. The user selects one MP4 Reel.
 3. The user enters or edits the analysis question.
 4. The application validates and uploads the video to Gemini.
@@ -91,52 +92,46 @@ REMI should not:
 
 Provide useful states for a missing video or prompt, invalid type, oversized file, missing configuration, provider failure or timeout, and invalid model output.
 
-## Approved Planned Components
+## Product Phases
 
-Each component is planned as a separate future PR in the order recorded in `ROADMAP.md`.
+The ordered PRs and gates are authoritative in `ROADMAP.md`.
 
-### Implemented: Private POC Access
+### Current: Private Manual-Upload Foundation
 
-`feat/private-poc-access` prepares the existing POC for Railway with two high-entropy HTTP Basic accounts. Authentication protects the whole application and is repeated inside the API-backed analysis route. The Gemini API key and access passwords remain server-side. Deployment is still a post-merge owner action.
+Private access is merged into the stable baseline. The owner and one invited friend manually upload one MP4 and ask one question. Authentication protects both the application and analysis route, and all secrets remain server-side. There is no database or permanent application storage.
 
-### Planned: Critique-Only Contract
+### Immediate: Manual Friction Analyser
 
-Replace creative direction, scores and forced findings with four evidence-based elements: observed moment, what feels wrong, likely viewer effect, and supporting visible or audible evidence.
+The immediate phase contains six focused PRs, in order:
 
-### Planned: Visual Timing and Layout Analysis
+1. critique-only contract;
+2. operational perceptual-friction rubric;
+3. visual timing analysis;
+4. audio-friction analysis;
+5. combined friction reporting; and
+6. real-Reel evaluation.
 
-Inspect inserted images, screenshots, text cards, captions, cropping, unreadable text, clutter, rapid cuts, sub-second images, overlong images and whether viewers have enough time to understand an image.
+The first PR removes the current creative instructions and confidence values. The operational rubric then gives the manual analyser a versioned, testable way to identify observable execution friction and explain likely viewer effects. It is a working product framework, not established science or a score.
 
-Gemini's ordinary video inspection may miss sub-second visuals. A planned deterministic preprocessing step using FFmpeg or an equivalent tool will detect visual changes, measure exact display intervals and provide relevant frames and timing facts to Gemini. No exact sampling frame rate is approved until it has been tested.
+Visual and audio PRs may add deterministic facts while preserving Gemini's complete-video judgment. Combined reporting will reconcile those inputs into one timestamped critique without confidence or virality scores. The final PR evaluates the complete analyser using manually uploaded Reels; it adds no platform integration or storage.
 
-### Planned: Audio and Sensory-Load Analysis
+Throughout this phase, REMI stays private to two users and retains the one-MP4-plus-one-question workflow. It has no Meta API, old-Reel import, Insights, database, creator memory or historical comparison. It does not volunteer criticism of the creator's script, subject, claims or content choices.
 
-Inspect music competing with speech, distracting effects, sudden volume changes, clipping, excessive loudness, emotionally conflicting music and combined visual/audio overload. Gemini provides human-like judgment; deterministic tooling may provide measurable loudness, peak and timing facts.
+### Later: Research-Grounded Viewer-Friction Knowledge
 
-### Planned: Instagram Connection
+After the manual analyser is complete and evaluated, a separate research phase will validate and improve the operational rubric using reliable evidence. Evidence provenance, applicability and limitations must be recorded. Research may confirm, revise or remove rubric criteria; the phase-1 rubric must not be presented as already research-validated.
 
-Allow a creator with an eligible professional Instagram account to authorize REMI through Instagram's official API. REMI's backend—not Gemini directly—will handle authentication and retrieval of that creator's own Reels and available Insights.
+This phase does not turn generic datasets into live-analysis truth, produce universal benchmarks or predict virality. Its PR breakdown will be decided after real-Reel evaluation.
 
-Exact Meta permissions, eligible account requirements, available metrics and app-review requirements remain implementation research. They are not guaranteed in this document.
+### Post-Research: Connected Creator Data
 
-### Planned: Creator Memory
+Meta authorization, old-Reel imports, available Insights, a persistent creator-account/profile layer, databases, creator history and historical comparison may be considered only after both earlier phases. Their exact order and API details are not approved yet.
 
-Store creator-specific structured critiques, verified Instagram performance metrics, purpose and format, posting date and duration, repeated observation tags, and model, prompt and schema versions.
-
-Raw Reel videos will not be retained permanently by default. Every creator's history must be isolated. The invited friend's mental-health content must never be compared with the owner's MMA, engineering or startup content. Deletion and privacy controls are required before broader availability.
-
-### Planned: Historical Comparison
-
-Analyse a new unpublished Reel in two stages:
-
-1. Produce a fresh critique without historical performance data.
-2. Run a separate comparison using only relevant Reels from that creator's isolated history.
-
-History may add context but must not overwrite or bias the fresh critique. Report evidence with counts such as `Observed in 4 of 6 comparable Reels.` Do not use confidence scores. REMI may say that a problem appeared repeatedly in weaker-performing Reels or may have contributed to performance; it must not claim proven causation because Instagram distribution and other external factors also affect reach.
+If later approved, REMI's backend—not Gemini—must handle Meta authentication and retrieval. Creator data must remain isolated, raw videos must not be permanently retained by default, and fresh critique must remain separate from history. Historical association cannot prove causation.
 
 ## Explicitly Deferred or Rejected
 
-REMI is not currently adding:
+The approved roadmap does not add or reintroduce:
 
 - generic viral-content datasets to live analysis;
 - fine-tuning Gemini;
@@ -144,7 +139,7 @@ REMI is not currently adding:
 - universal benchmarks that mix unrelated creators;
 - automatic creative rewriting;
 - permanent raw-video storage;
-- confidence scores;
+- confidence scores; the first manual-analyser PR removes the current legacy field;
 - a full analytics dashboard; or
 - automatic posting to Instagram.
 
@@ -159,8 +154,8 @@ Public datasets may later support offline evaluation, but they will not be the s
 - Mental-health critique must not reward fearmongering, shame, diagnosis-by-video, disclosure pressure, manipulation or clinical overclaiming.
 - Planned components must preserve or measurably improve the usefulness of the existing Gemini analysis.
 
-## Product Validation
+## Planned Product Validation
 
-Evaluate approximately ten varied Reels, including effective Reels where zero findings is the correct result. Measure timestamp accuracy, evidence quality, usefulness of the explanation, false or forced criticism, hallucinations, domain safety and repeat-run directional consistency.
+The sixth manual-analyser PR will evaluate approximately ten varied, manually uploaded Reels, including effective Reels where zero findings is the correct result. It will measure timestamp accuracy, evidence quality, usefulness of the explanation, false or forced criticism, hallucinations, domain safety and repeat-run directional consistency.
 
-The thresholds remain learning tools rather than marketing claims. Historical performance can support comparison but cannot prove why a Reel succeeded or failed.
+The thresholds remain learning tools rather than marketing claims. No Meta Insights or creator history are inputs to this evaluation. Any later historical performance evidence may support comparison but cannot prove why a Reel succeeded or failed.

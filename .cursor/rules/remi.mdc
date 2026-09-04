@@ -5,9 +5,11 @@ alwaysApply: true
 
 Read `AGENTS.md` and the documents it references before changing code.
 
-Implement only the current REMI private proof of concept: one MP4 plus one prompt sent server-side to Gemini, returning a validated structured creative critique behind owner/friend access control.
+Implement only the current branch's component from `docs/ROADMAP.md`. The stable REMI foundation is a private owner/friend application that manually sends one MP4 plus one question to Gemini and returns a validated critique.
 
-Do not add persistence, Instagram integration, preprocessing, secondary models, virality prediction or unrelated creator tools unless the user explicitly changes scope.
+During the manual-analyser and research-grounding phases, do not add persistence, Meta integration, old-Reel imports, Insights, creator history, secondary models, virality prediction or unrelated creator tools. Deterministic preprocessing belongs only to its named visual-timing or audio-friction PR.
+
+Preserve the critic-only direction: no confidence scores, creative fixes or unsolicited script/content criticism. The stable code still has legacy solution and confidence fields until `feat/critique-only-contract` changes the prompt, schema, interface and tests together.
 
 Protect unpublished videos, enforce access on the analysis route itself, and keep all credentials exclusively server-side.
 
